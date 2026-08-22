@@ -1,0 +1,23 @@
+# Node & Next.js build output
+node_modules/
+.next/
+dist/
+build/
+
+# Python cache & virtualenv
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+ENV/
+
+# Local databases & logs
+*.db
+*.sqlite
+*.log
+.env
+
+# Antigravity system logs
+.system_generated/

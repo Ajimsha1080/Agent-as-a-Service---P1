@@ -11,14 +11,14 @@ export default function PlatformPropertiesPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 font-sans">
-      <div className="border-b border-zinc-800/80 pb-6">
-        <h1 className="text-2xl font-bold text-zinc-100">Global Properties Registry</h1>
-        <p className="text-xs text-zinc-400 mt-1">All 128 registered resorts, hotels, and hostels across 42 tenant accounts.</p>
+      <div className="border-b border-zinc-200 pb-6">
+        <h1 className="text-2xl font-bold text-zinc-900">Global Properties Registry</h1>
+        <p className="text-xs text-zinc-500 mt-1">All 128 registered resorts, hotels, and hostels across 42 tenant accounts.</p>
       </div>
 
-      <div className="p-6 bg-zinc-900/60 border border-zinc-800/80 rounded-xl space-y-4">
+      <div className="yc-card p-6 space-y-4">
         <table className="w-full text-left text-xs font-mono">
-          <thead className="text-zinc-500 border-b border-zinc-800/80">
+          <thead className="text-zinc-500 border-b border-zinc-200">
             <tr>
               <th className="pb-3">PROPERTY NAME</th>
               <th className="pb-3">ORGANIZATION</th>
@@ -27,14 +27,14 @@ export default function PlatformPropertiesPage() {
               <th className="pb-3">ACTIVE AGENTS</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-800/60 text-zinc-300">
+          <tbody className="divide-y divide-zinc-200 text-zinc-800">
             {globalProperties.map(p => (
               <tr key={p.id}>
-                <td className="py-3 font-medium text-zinc-100">{p.name}</td>
-                <td className="text-purple-300">{p.org}</td>
-                <td><span className="px-2 py-0.5 bg-zinc-800 rounded text-zinc-300 text-[10px]">{p.type}</span></td>
-                <td>{p.location}</td>
-                <td className="font-bold text-zinc-100">{p.agents} Active</td>
+                <td className="py-3 font-bold text-zinc-900">{p.name}</td>
+                <td className="text-zinc-700 font-semibold">{p.org}</td>
+                <td><span className="yc-badge">{p.type}</span></td>
+                <td className="text-zinc-600">{p.location}</td>
+                <td className="font-bold text-zinc-900">{p.agents} Active</td>
               </tr>
             ))}
           </tbody>

@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation';
 import { 
   Building2, Bot, ShieldCheck, DollarSign, Cpu, Activity, Settings, ChevronLeft, ChevronRight, Search, Bell, Layers, FileText 
 } from 'lucide-react';
-import { ThemeToggle } from '../../components/ui/theme-toggle';
 
 export default function PlatformAdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -100,7 +99,6 @@ export default function PlatformAdminLayout({ children }: { children: React.Reac
           </div>
 
           <div className="flex items-center gap-4 text-xs">
-            <ThemeToggle />
             <Link href="/app/dashboard" className="yc-btn-secondary">
               Switch to Org Admin Portal →
             </Link>

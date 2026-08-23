@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation';
 import { 
   Building2, Bot, BookOpen, Radio, BarChart3, CreditCard, Home, MessageSquare, ChevronLeft, ChevronRight, Search, Bell, Sparkles 
 } from 'lucide-react';
-import { ThemeToggle } from '../../components/ui/theme-toggle';
 import { CommandMenu } from '../../components/ui/command-menu';
 
 export default function OrganizationAppLayout({ children }: { children: React.ReactNode }) {
@@ -123,7 +122,6 @@ export default function OrganizationAppLayout({ children }: { children: React.Re
 
           {/* Action Tools */}
           <div className="flex items-center gap-3 text-xs">
-            <ThemeToggle />
             <Link href="/guest/agt_concierge_01" className="yc-btn-secondary">
               Preview Guest Concierge
             </Link>

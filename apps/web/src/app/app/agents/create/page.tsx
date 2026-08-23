@@ -79,13 +79,13 @@ export default function AgentBuilderPage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 font-sans">
-      <div className="border-b border-zinc-800/80 pb-5">
-        <h1 className="text-2xl font-bold text-zinc-100">No-Code AI Agent Builder</h1>
-        <p className="text-xs text-zinc-400 mt-1">Configure, test, and deploy a production hospitality agent in 9 simple steps.</p>
+      <div className="border-b border-zinc-200 pb-5">
+        <h1 className="text-2xl font-bold text-zinc-900">No-Code AI Agent Builder</h1>
+        <p className="text-xs text-zinc-500 mt-1">Configure, test, and deploy a production hospitality agent in 9 simple steps.</p>
       </div>
 
       {/* Step Navigation Progress */}
-      <div className="flex items-center justify-between bg-zinc-900/60 border border-zinc-800/80 p-2 rounded-xl overflow-x-auto gap-1">
+      <div className="flex items-center justify-between bg-white border border-zinc-200 p-2 rounded-xl overflow-x-auto gap-1 shadow-xs">
         {steps.map((label, idx) => {
           const stepNum = idx + 1;
           const isActive = currentStep === stepNum;
@@ -95,39 +95,39 @@ export default function AgentBuilderPage() {
               key={label} 
               onClick={() => setCurrentStep(stepNum)}
               className={`flex items-center gap-1.5 cursor-pointer px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
-                isActive ? 'bg-zinc-100 text-zinc-950 font-semibold shadow-sm' : isDone ? 'text-emerald-400 bg-emerald-500/10' : 'text-zinc-400 hover:text-zinc-200'
+                isActive ? 'bg-zinc-900 text-white font-semibold shadow-xs' : isDone ? 'text-emerald-700 bg-emerald-50' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
               }`}
             >
               <span>{label}</span>
-              {isDone && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
+              {isDone && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
             </div>
           );
         })}
       </div>
 
       {/* Step Content */}
-      <div className="p-6 bg-zinc-900/60 border border-zinc-800/80 rounded-xl">
+      <div className="yc-card p-6">
         {/* STEP 1: BASICS */}
         {currentStep === 1 && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4 text-xs">
-              <h2 className="text-sm font-bold text-zinc-100">STEP 1: Basic Information</h2>
+              <h2 className="text-sm font-bold text-zinc-900">STEP 1: Basic Information</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-zinc-400 font-medium mb-1.5">Agent Name</label>
+                  <label className="block text-zinc-700 font-semibold mb-1.5">Agent Name</label>
                   <input 
                     type="text" 
                     value={formData.name} 
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3.5 py-2 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700"
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3.5 py-2 text-xs text-zinc-900 focus:outline-none focus:border-zinc-400"
                   />
                 </div>
                 <div>
-                  <label className="block text-zinc-400 font-medium mb-1.5">Agent Type</label>
+                  <label className="block text-zinc-700 font-semibold mb-1.5">Agent Type</label>
                   <select 
                     value={formData.agent_type}
                     onChange={(e) => setFormData({...formData, agent_type: e.target.value})}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3.5 py-2 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700"
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3.5 py-2 text-xs text-zinc-900 focus:outline-none focus:border-zinc-400"
                   >
                     <option value="Hospitality Concierge">Hospitality Concierge</option>
                     <option value="Booking Agent">Booking Agent</option>
@@ -137,27 +137,27 @@ export default function AgentBuilderPage() {
               </div>
 
               <div>
-                <label className="block text-zinc-400 font-medium mb-1.5">Description</label>
+                <label className="block text-zinc-700 font-semibold mb-1.5">Description</label>
                 <textarea 
                   rows={3}
                   value={formData.description} 
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3.5 py-2 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700"
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3.5 py-2 text-xs text-zinc-900 focus:outline-none focus:border-zinc-400"
                 />
               </div>
             </div>
 
             {/* LIVE AGENT PREVIEW */}
-            <div className="bg-zinc-950 border border-zinc-800/80 rounded-xl p-5 flex flex-col justify-between text-xs">
+            <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-5 flex flex-col justify-between text-xs">
               <div>
-                <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider block mb-3">AGENT IDENTITY PREVIEW</span>
-                <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl space-y-2">
-                  <div className="w-10 h-10 rounded-lg bg-zinc-800 text-zinc-100 flex items-center justify-center font-bold text-lg">
+                <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider block mb-3 font-mono">AGENT IDENTITY PREVIEW</span>
+                <div className="p-4 bg-white border border-zinc-200 rounded-xl space-y-2 shadow-xs">
+                  <div className="w-10 h-10 rounded-lg bg-zinc-900 text-white flex items-center justify-center font-bold text-lg">
                     🤖
                   </div>
-                  <h3 className="font-bold text-zinc-100">{formData.name}</h3>
-                  <p className="text-zinc-400 text-[11px]">{formData.agent_type}</p>
-                  <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 text-[10px] font-mono inline-block">
+                  <h3 className="font-bold text-zinc-900">{formData.name}</h3>
+                  <p className="text-zinc-500 text-[11px]">{formData.agent_type}</p>
+                  <span className="px-2 py-0.5 rounded bg-zinc-100 text-zinc-700 text-[10px] font-mono inline-block">
                     ● DRAFT MODE
                   </span>
                 </div>
@@ -169,10 +169,10 @@ export default function AgentBuilderPage() {
         {/* STEP 2: PERSONALITY */}
         {currentStep === 2 && (
           <div className="space-y-6 text-xs">
-            <h2 className="text-sm font-bold text-zinc-100">STEP 2: Personality Controls</h2>
+            <h2 className="text-sm font-bold text-zinc-900">STEP 2: Personality Controls</h2>
             
             <div>
-              <label className="block text-zinc-400 font-medium mb-2">Tone of Voice</label>
+              <label className="block text-zinc-700 font-semibold mb-2">Tone of Voice</label>
               <div className="grid grid-cols-4 gap-3">
                 {['Friendly', 'Professional', 'Luxury', 'Casual'].map(t => (
                   <button
@@ -180,8 +180,8 @@ export default function AgentBuilderPage() {
                     onClick={() => setFormData({...formData, tone: t})}
                     className={`p-3 rounded-lg border text-xs font-semibold transition-colors text-center ${
                       formData.tone === t 
-                        ? 'bg-zinc-800 border-zinc-700 text-zinc-100' 
-                        : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-zinc-200'
+                        ? 'bg-zinc-900 border-zinc-900 text-white shadow-xs' 
+                        : 'bg-zinc-50 border-zinc-200 text-zinc-700 hover:bg-zinc-100'
                     }`}
                   >
                     {t}
@@ -195,10 +195,10 @@ export default function AgentBuilderPage() {
         {/* STEP 3: KNOWLEDGE */}
         {currentStep === 3 && (
           <div className="space-y-5 text-xs">
-            <h2 className="text-sm font-bold text-zinc-100">STEP 3: Knowledge Base Upload</h2>
-            <div className="p-6 border-2 border-dashed border-zinc-800 rounded-xl text-center bg-zinc-950 space-y-2">
-              <FileText className="w-6 h-6 text-zinc-400 mx-auto" />
-              <p className="font-semibold text-zinc-100">Drag & Drop Property Documents (PDF, DOCX, TXT)</p>
+            <h2 className="text-sm font-bold text-zinc-900">STEP 3: Knowledge Base Upload</h2>
+            <div className="p-6 border-2 border-dashed border-zinc-300 rounded-xl text-center bg-zinc-50 space-y-2">
+              <FileText className="w-6 h-6 text-zinc-500 mx-auto" />
+              <p className="font-semibold text-zinc-900">Drag & Drop Property Documents (PDF, DOCX, TXT)</p>
             </div>
           </div>
         )}
@@ -206,21 +206,21 @@ export default function AgentBuilderPage() {
         {/* STEP 4: TOOLS */}
         {currentStep === 4 && (
           <div className="space-y-4 text-xs">
-            <h2 className="text-sm font-bold text-zinc-100">STEP 4: Authorized Dynamic Tools</h2>
+            <h2 className="text-sm font-bold text-zinc-900">STEP 4: Authorized Dynamic Tools</h2>
             <div className="grid grid-cols-2 gap-3">
               {formData.tools.map(tool => (
                 <div 
                   key={tool.id} 
                   onClick={() => toggleTool(tool.id)}
                   className={`p-4 rounded-xl border cursor-pointer transition-colors flex items-start justify-between ${
-                    tool.enabled ? 'bg-zinc-950 border-zinc-700' : 'bg-zinc-950/40 border-zinc-800 opacity-60'
+                    tool.enabled ? 'bg-white border-zinc-300 shadow-xs' : 'bg-zinc-50 border-zinc-200 opacity-60'
                   }`}
                 >
                   <div className="space-y-1">
-                    <span className="font-bold text-zinc-100">{tool.name}</span>
-                    <p className="text-[11px] text-zinc-400">{tool.desc}</p>
+                    <span className="font-bold text-zinc-900">{tool.name}</span>
+                    <p className="text-[11px] text-zinc-500">{tool.desc}</p>
                   </div>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${tool.enabled ? 'bg-zinc-100 text-zinc-950' : 'bg-zinc-800 text-zinc-500'}`}>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${tool.enabled ? 'bg-zinc-900 text-white' : 'bg-zinc-200 text-zinc-600'}`}>
                     {tool.enabled ? 'ON' : 'OFF'}
                   </span>
                 </div>
@@ -232,11 +232,11 @@ export default function AgentBuilderPage() {
         {/* STEP 9: DEPLOY */}
         {currentStep === 9 && (
           <div className="space-y-5 text-xs">
-            <h2 className="text-sm font-bold text-zinc-100">STEP 9: Deploy Agent to Production</h2>
+            <h2 className="text-sm font-bold text-zinc-900">STEP 9: Deploy Agent to Production</h2>
             {!deploymentResult ? (
               isDeploying ? (
-                <div className="p-5 bg-zinc-950 border border-zinc-800 rounded-xl space-y-2 font-mono text-zinc-300">
-                  <div className="flex items-center gap-2 font-bold text-zinc-100">
+                <div className="p-5 bg-zinc-50 border border-zinc-200 rounded-xl space-y-2 font-mono text-zinc-700">
+                  <div className="flex items-center gap-2 font-bold text-zinc-900">
                     <RefreshCw className="w-4 h-4 animate-spin" /> Deploying Agent...
                   </div>
                   {deploySteps.slice(0, deployStepIndex + 1).map((s, i) => (
@@ -246,15 +246,15 @@ export default function AgentBuilderPage() {
               ) : (
                 <button 
                   onClick={handleDeployClick}
-                  className="w-full py-3 bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-sm rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
+                  className="yc-btn-primary w-full py-3 text-sm font-bold flex items-center justify-center gap-2"
                 >
                   <Rocket className="w-4 h-4" /> Click "Deploy Agent"
                 </button>
               )
             ) : (
-              <div className="p-5 bg-zinc-950 border border-zinc-800 rounded-xl space-y-3 font-mono">
-                <span className="text-emerald-400 font-bold">✓ AGENT DEPLOYED & ACTIVE</span>
-                <pre className="p-3 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-300 text-[11px] overflow-x-auto">
+              <div className="p-5 bg-zinc-50 border border-zinc-200 rounded-xl space-y-3 font-mono">
+                <span className="text-emerald-700 font-bold">✓ AGENT DEPLOYED & ACTIVE</span>
+                <pre className="p-3 bg-white border border-zinc-200 rounded-lg text-zinc-900 text-[11px] overflow-x-auto shadow-xs">
                   {deploymentResult.widget_script}
                 </pre>
               </div>
@@ -263,11 +263,11 @@ export default function AgentBuilderPage() {
         )}
 
         {/* Step Navigation Bar */}
-        <div className="mt-6 flex items-center justify-between border-t border-zinc-800/80 pt-4">
+        <div className="mt-6 flex items-center justify-between border-t border-zinc-200 pt-4">
           <button 
             disabled={currentStep === 1}
             onClick={() => setCurrentStep(prev => prev - 1)}
-            className="px-3.5 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-semibold disabled:opacity-40"
+            className="yc-btn-secondary disabled:opacity-40"
           >
             ← Previous
           </button>
@@ -275,7 +275,7 @@ export default function AgentBuilderPage() {
           {currentStep < 9 && (
             <button 
               onClick={() => setCurrentStep(prev => prev + 1)}
-              className="px-4 py-2 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-colors"
+              className="yc-btn-primary flex items-center gap-1.5"
             >
               Next Step <ChevronRight className="w-3.5 h-3.5" />
             </button>

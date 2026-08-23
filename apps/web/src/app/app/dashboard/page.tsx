@@ -175,8 +175,8 @@ export default function SaaSUserDashboard() {
               </div>
 
               <div className="flex justify-end gap-2 pt-1">
-                <Link href={`/app/agents/${a.id}/playground`} className="px-3 py-1 bg-zinc-50 border border-zinc-200 hover:bg-zinc-100 text-zinc-700 text-[11px] font-medium rounded-md transition-colors">
-                  Playground
+                <Link href={`/guest/${a.id}`} className="px-3 py-1 bg-zinc-50 border border-zinc-200 hover:bg-zinc-100 text-zinc-700 text-[11px] font-medium rounded-md transition-colors">
+                  Playground View
                 </Link>
                 <Link href="/app/conversations" className="px-3 py-1 bg-zinc-50 border border-zinc-200 hover:bg-zinc-100 text-zinc-700 text-[11px] font-medium rounded-md transition-colors">
                   Inbox

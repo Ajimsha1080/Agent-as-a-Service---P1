@@ -56,32 +56,32 @@ export default function AppConversationsInboxPage() {
   return (
     <div className="h-[calc(100vh-120px)] grid grid-cols-1 lg:grid-cols-12 gap-4 font-sans overflow-hidden">
       {/* LEFT COLUMN: Conversation List */}
-      <div className="lg:col-span-3 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col overflow-hidden">
-        <div className="p-4 border-b border-slate-800 bg-slate-950 flex items-center justify-between">
-          <h2 className="font-bold text-sm text-white">Staff Inbox</h2>
-          <span className="px-2 py-0.5 bg-teal-500/10 text-teal-300 text-[10px] font-bold rounded">
+      <div className="lg:col-span-3 bg-white border border-zinc-200 rounded-2xl flex flex-col overflow-hidden shadow-xs">
+        <div className="p-4 border-b border-zinc-200 bg-zinc-50 flex items-center justify-between">
+          <h2 className="font-bold text-sm text-zinc-900">Staff Inbox</h2>
+          <span className="yc-badge">
             {conversations.length} Active
           </span>
         </div>
 
-        <div className="flex-1 overflow-y-auto divide-y divide-slate-800/60">
+        <div className="flex-1 overflow-y-auto divide-y divide-zinc-200">
           {conversations.map((c) => (
             <div
               key={c.id}
               onClick={() => setSelectedConv(c.id)}
               className={`p-4 cursor-pointer transition-all ${
-                selectedConv === c.id ? 'bg-slate-800/80 border-l-4 border-teal-500' : 'hover:bg-slate-800/40'
+                selectedConv === c.id ? 'bg-zinc-100 border-l-4 border-zinc-900' : 'hover:bg-zinc-50'
               }`}
             >
               <div className="flex items-center justify-between mb-1">
-                <span className="font-bold text-xs text-white">{c.guest}</span>
-                <span className="text-[10px] text-slate-500">{c.time}</span>
+                <span className="font-bold text-xs text-zinc-900">{c.guest}</span>
+                <span className="text-[10px] text-zinc-400 font-mono">{c.time}</span>
               </div>
-              <p className="text-[11px] text-slate-400 line-clamp-1 mb-2">{c.lastMessage}</p>
+              <p className="text-[11px] text-zinc-600 line-clamp-1 mb-2">{c.lastMessage}</p>
               <div className="flex items-center justify-between text-[10px]">
-                <span className="text-slate-500">{c.agent}</span>
+                <span className="text-zinc-500 font-mono">{c.agent}</span>
                 <span className={`px-2 py-0.5 rounded font-bold ${
-                  c.status === 'Needs Attention' ? 'bg-amber-500/20 text-amber-300' : 'bg-emerald-500/20 text-emerald-300'
+                  c.status === 'Needs Attention' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'yc-badge-emerald'
                 }`}>
                   {c.status}
                 </span>
@@ -92,16 +92,16 @@ export default function AppConversationsInboxPage() {
       </div>
 
       {/* CENTER COLUMN: Intercom-Grade Active Chat Feed */}
-      <div className="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col justify-between overflow-hidden">
+      <div className="lg:col-span-6 bg-white border border-zinc-200 rounded-2xl flex flex-col justify-between overflow-hidden shadow-xs">
         {/* Chat Header with Human Takeover Switch */}
-        <div className="p-4 border-b border-slate-800 bg-slate-950 flex items-center justify-between">
+        <div className="p-4 border-b border-zinc-200 bg-white flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-teal-500/20 text-teal-300 font-bold flex items-center justify-center text-xs">
+            <div className="w-9 h-9 rounded-full bg-zinc-900 text-white font-bold flex items-center justify-center text-xs shadow-xs">
               {activeConv.guest.charAt(0)}
             </div>
             <div>
-              <h3 className="font-bold text-sm text-white">{activeConv.guest}</h3>
-              <p className="text-[10px] text-slate-400">{activeConv.room} • {activeConv.property}</p>
+              <h3 className="font-bold text-sm text-zinc-900">{activeConv.guest}</h3>
+              <p className="text-[10px] text-zinc-500 font-medium">{activeConv.room} • {activeConv.property}</p>
             </div>
           </div>
 
@@ -109,8 +109,8 @@ export default function AppConversationsInboxPage() {
             onClick={() => setIsHumanTakeover(!isHumanTakeover)}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
               isHumanTakeover 
-                ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20' 
-                : 'bg-slate-800 hover:bg-slate-700 text-teal-300 border border-teal-500/30'
+                ? 'bg-amber-500 text-white shadow-xs' 
+                : 'yc-btn-secondary'
             }`}
           >
             <UserCheck className="w-3.5 h-3.5" />
@@ -119,32 +119,32 @@ export default function AppConversationsInboxPage() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 p-6 space-y-4 overflow-y-auto bg-slate-950">
+        <div className="flex-1 p-6 space-y-4 overflow-y-auto bg-zinc-50/50">
           <div className="flex justify-start">
-            <div className="bg-slate-900 border border-slate-800 text-slate-200 p-4 rounded-2xl text-xs max-w-[80%]">
+            <div className="bg-white border border-zinc-200 text-zinc-800 p-4 rounded-2xl text-xs max-w-[80%] shadow-xs">
               Hello! Is the infinity swimming pool open until 8 PM tonight?
             </div>
           </div>
 
           <div className="flex justify-end">
-            <div className="bg-teal-500 text-slate-950 p-4 rounded-2xl text-xs font-medium max-w-[80%]">
+            <div className="bg-zinc-900 text-white p-4 rounded-2xl text-xs font-medium max-w-[80%] shadow-xs">
               Good evening! Yes, our temperature-controlled Infinity Pool is open until 8:00 PM today. Towels are available at the poolside kiosk.
             </div>
           </div>
         </div>
 
         {/* Input Bar */}
-        <div className="p-4 border-t border-slate-800 bg-slate-900 flex items-center gap-3">
+        <div className="p-4 border-t border-zinc-200 bg-white flex items-center gap-3">
           <input
             type="text"
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
             placeholder={isHumanTakeover ? "Reply directly to guest as staff..." : "Agent auto-pilot active. Take over to type..."}
-            className="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-teal-500"
+            className="flex-1 bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-zinc-400"
           />
           <button 
             onClick={handleSendMessage}
-            className="px-4 py-2.5 bg-teal-500 text-slate-950 font-bold text-xs rounded-xl"
+            className="yc-btn-primary p-2.5"
           >
             <Send className="w-4 h-4" />
           </button>
@@ -152,33 +152,33 @@ export default function AppConversationsInboxPage() {
       </div>
 
       {/* RIGHT COLUMN: Guest CRM Context Drawer */}
-      <div className="lg:col-span-3 bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between text-xs overflow-y-auto space-y-6">
+      <div className="lg:col-span-3 bg-white border border-zinc-200 rounded-2xl p-5 flex flex-col justify-between text-xs overflow-y-auto space-y-6 shadow-xs">
         <div>
-          <h3 className="font-bold text-sm text-white border-b border-slate-800 pb-3 mb-4 uppercase tracking-wider">
+          <h3 className="font-bold text-xs text-zinc-900 border-b border-zinc-200 pb-3 mb-4 uppercase tracking-wider font-mono">
             Guest CRM Profile
           </h3>
 
-          <div className="space-y-4 text-slate-300">
+          <div className="space-y-4 text-zinc-700">
             <div>
-              <span className="text-slate-500 block text-[10px]">GUEST NAME</span>
-              <span className="text-white font-bold">{activeConv.guest}</span>
+              <span className="text-zinc-500 block text-[10px] font-mono uppercase">GUEST NAME</span>
+              <span className="text-zinc-900 font-bold">{activeConv.guest}</span>
             </div>
 
             <div>
-              <span className="text-slate-500 block text-[10px]">STAY DETAILS</span>
-              <span className="text-teal-300 font-semibold">{activeConv.room}</span>
+              <span className="text-zinc-500 block text-[10px] font-mono uppercase">STAY DETAILS</span>
+              <span className="text-zinc-900 font-semibold">{activeConv.room}</span>
             </div>
 
             <div>
-              <span className="text-slate-500 block text-[10px]">AI AGENT IN CHARGE</span>
-              <span className="text-white">{activeConv.agent}</span>
+              <span className="text-zinc-500 block text-[10px] font-mono uppercase">AI AGENT IN CHARGE</span>
+              <span className="text-zinc-900 font-medium">{activeConv.agent}</span>
             </div>
 
             <div>
-              <span className="text-slate-500 block text-[10px] mb-1">CONVERSATION TAGS</span>
+              <span className="text-zinc-500 block text-[10px] font-mono uppercase mb-1">CONVERSATION TAGS</span>
               <div className="flex gap-1.5 flex-wrap">
                 {activeConv.tags.map(t => (
-                  <span key={t} className="px-2 py-0.5 bg-slate-800 text-teal-300 text-[10px] rounded font-semibold">
+                  <span key={t} className="yc-badge">
                     #{t}
                   </span>
                 ))}
@@ -187,11 +187,11 @@ export default function AppConversationsInboxPage() {
           </div>
         </div>
 
-        <div className="border-t border-slate-800 pt-4 space-y-2">
-          <button className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl">
+        <div className="border-t border-zinc-200 pt-4 space-y-2">
+          <button className="yc-btn-secondary w-full py-2 text-xs">
             View Reservation Details
           </button>
-          <button className="w-full py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 text-xs font-bold rounded-xl border border-emerald-500/30">
+          <button className="w-full py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold rounded-xl border border-emerald-200 transition-colors">
             ✓ Mark Conversation Resolved
           </button>
         </div>

@@ -12,30 +12,30 @@ export default function AppLiveUpdatesPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 font-sans">
-      <div className="flex items-center justify-between border-b border-zinc-800/80 pb-6">
+      <div className="flex items-center justify-between border-b border-zinc-200 pb-6">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-100">Live Property Operations Status</h1>
-          <p className="text-xs text-zinc-400 mt-1">Staff console to publish instant status changes for pool, spa, dining, and facilities.</p>
+          <h1 className="text-2xl font-bold text-zinc-900">Live Property Operations Status</h1>
+          <p className="text-xs text-zinc-500 mt-1">Staff console to publish instant status changes for pool, spa, dining, and facilities.</p>
         </div>
 
-        <button className="px-3.5 py-2 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs rounded-lg shadow-sm transition-colors flex items-center gap-1.5">
+        <button className="yc-btn-primary flex items-center gap-1.5">
           <Plus className="w-3.5 h-3.5" /> + Publish Status Broadcast
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {facilities.map((f, idx) => (
-          <div key={idx} className="p-5 bg-zinc-900/60 border border-zinc-800/80 rounded-xl flex items-center justify-between">
+          <div key={idx} className="yc-card p-5 flex items-center justify-between">
             <div className="space-y-1">
-              <h3 className="font-bold text-sm text-zinc-100">{f.name}</h3>
-              <p className="text-xs text-zinc-400">{f.hours}</p>
-              <p className="text-[10px] text-zinc-500 font-mono">Updated {f.updated}</p>
+              <h3 className="font-bold text-sm text-zinc-900">{f.name}</h3>
+              <p className="text-xs text-zinc-600">{f.hours}</p>
+              <p className="text-[10px] text-zinc-400 font-mono">Updated {f.updated}</p>
             </div>
 
             <span className={`px-3 py-1 rounded text-xs font-bold font-mono ${
-              f.status === 'OPEN' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-              f.status === 'LIMITED' ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' :
-              'bg-red-500/10 text-red-400 border border-red-500/20'
+              f.status === 'OPEN' ? 'yc-badge-emerald' :
+              f.status === 'LIMITED' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
+              'bg-red-100 text-red-800 border border-red-200'
             }`}>
               ● {f.status}
             </span>

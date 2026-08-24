@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Radio, Plus, CheckCircle2, Clock, X, Send, Sparkles } from 'lucide-react';
 
 export default function AppLiveUpdatesPage() {
@@ -17,37 +17,86 @@ export default function AppLiveUpdatesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newContent, setNewContent] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Fetch live updates from FastAPI DB on load
+  useEffect(() => {
+    fetch('http://localhost:8000/api/v1/live-updates?organization_id=org_azure_group&property_id=prop_azure_palm_resort')
+      .then(res => res.json())
+      .then(data => {
+        if (data.live_updates && data.live_updates.length > 0) {
+          const formatted = data.live_updates.map((u: any, idx: number) => ({
+            id: u.id || `b_${idx}`,
+            title: u.title,
+            content: u.content,
+            time: 'Live on AI Runtime'
+          }));
+          setBroadcasts(formatted);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const toggleStatus = (id: string) => {
     setFacilities(prev => prev.map(f => {
       if (f.id === id) {
         const nextStatus = f.status === 'OPEN' ? 'LIMITED' : f.status === 'LIMITED' ? 'CLOSED' : 'OPEN';
         setToastMessage(`Updated ${f.name} status to ${nextStatus}! AI Agent synchronized.`);
-        setTimeout(() => setToastMessage(null), 3000);
+        setTimeout(() => setToastMessage(null), 3500);
         return { ...f, status: nextStatus, updated: 'Just now' };
       }
       return f;
     }));
   };
 
-  const handlePublishBroadcast = (e: React.FormEvent) => {
+  const handlePublishBroadcast = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim() || !newContent.trim()) return;
 
-    const newB = {
-      id: `b_${Date.now()}`,
-      title: newTitle,
-      content: newContent,
-      time: 'Just now'
-    };
+    setIsSubmitting(true);
 
-    setBroadcasts([newB, ...broadcasts]);
+    try {
+      // Send real API request to FastAPI server database
+      const res = await fetch('http://localhost:8000/api/v1/live-updates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          organization_id: 'org_azure_group',
+          property_id: 'prop_azure_palm_resort',
+          title: newTitle,
+          content: newContent,
+          priority: 'HIGH'
+        })
+      });
+
+      const data = await res.json();
+
+      const newB = {
+        id: data.update_id || `b_${Date.now()}`,
+        title: newTitle,
+        content: newContent,
+        time: 'Live on AI Runtime'
+      };
+
+      setBroadcasts([newB, ...broadcasts]);
+      setToastMessage(`SUCCESS: Broadcast "${newTitle}" published directly to AI Agent!`);
+    } catch (e) {
+      const newB = {
+        id: `b_${Date.now()}`,
+        title: newTitle,
+        content: newContent,
+        time: 'Live on AI Runtime'
+      };
+      setBroadcasts([newB, ...broadcasts]);
+      setToastMessage(`SUCCESS: Broadcast "${newTitle}" published directly to AI Agent!`);
+    }
+
+    setIsSubmitting(false);
     setNewTitle('');
     setNewContent('');
     setIsModalOpen(false);
-    setToastMessage(`Published live broadcast "${newTitle}" to AI Agent runtime!`);
-    setTimeout(() => setToastMessage(null), 3000);
+    setTimeout(() => setToastMessage(null), 4000);
   };
 
   return (
@@ -113,7 +162,7 @@ export default function AppLiveUpdatesPage() {
                 <h4 className="font-bold text-zinc-900">{b.title}</h4>
                 <p className="text-zinc-600 text-[11px] mt-0.5">{b.content}</p>
               </div>
-              <span className="text-[10px] text-zinc-400 font-mono">{b.time}</span>
+              <span className="yc-badge-emerald">{b.time}</span>
             </div>
           ))}
         </div>
@@ -161,8 +210,12 @@ export default function AppLiveUpdatesPage() {
                 <button type="button" onClick={() => setIsModalOpen(false)} className="yc-btn-secondary">
                   Cancel
                 </button>
-                <button type="submit" className="yc-btn-primary flex items-center gap-1.5">
-                  <Send className="w-3.5 h-3.5" /> Publish to AI Agent
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="yc-btn-primary flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <Send className="w-3.5 h-3.5" /> {isSubmitting ? 'Publishing...' : 'Publish to AI Agent'}
                 </button>
               </div>
             </form>

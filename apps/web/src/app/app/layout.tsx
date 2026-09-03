@@ -116,13 +116,31 @@ export default function OrganizationAppLayout({ children }: { children: React.Re
             </span>
           </div>
 
-          {/* Action Tools */}
-          <div className="flex items-center gap-3 text-xs">
-            <Link href="/guest/agt_concierge_01" className="yc-btn-secondary">
-              Preview Guest Concierge
+          {/* 1-Click Unified Portal Switcher */}
+          <div className="flex items-center bg-zinc-100 p-1 rounded-xl border border-zinc-200 text-xs font-semibold">
+            <Link 
+              href="/app/dashboard" 
+              className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+                pathname.startsWith('/app') ? 'bg-zinc-900 text-white shadow-xs' : 'text-zinc-600 hover:text-zinc-900'
+              }`}
+            >
+              🏨 Hostel SaaS Admin
             </Link>
-            <Link href="/app/agents" className="yc-btn-primary">
-              Predefined Agents
+            <Link 
+              href="/guest/agt_hostel_01" 
+              className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+                pathname.startsWith('/guest') ? 'bg-zinc-900 text-white shadow-xs' : 'text-zinc-600 hover:text-zinc-900'
+              }`}
+            >
+              💬 Resident AI Chat
+            </Link>
+            <Link 
+              href="/platform/dashboard" 
+              className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+                pathname.startsWith('/platform') ? 'bg-zinc-900 text-white shadow-xs' : 'text-zinc-600 hover:text-zinc-900'
+              }`}
+            >
+              🛡️ Super Admin
             </Link>
           </div>
         </header>

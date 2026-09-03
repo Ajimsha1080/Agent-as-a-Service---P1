@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useRef } from 'react';
+import Link from 'next/link';
 import { Send, Sparkles, Utensils, Calendar, ShieldCheck } from 'lucide-react';
 import { VoiceOrb } from '../../../components/ui/voice-orb';
 
@@ -246,6 +247,22 @@ export default function GuestConciergePage() {
 
   return (
     <div className="min-h-screen bg-white text-zinc-900 flex flex-col justify-between max-w-4xl mx-auto border-x border-zinc-200 font-sans shadow-sm">
+      {/* 1-Click Unified Portal Switcher */}
+      <div className="flex items-center justify-between bg-zinc-100 p-2 border-b border-zinc-200 text-xs font-semibold px-4">
+        <span className="text-zinc-500 font-mono text-[11px] font-semibold">PORTAL SWITCHER:</span>
+        <div className="flex items-center gap-1">
+          <Link href="/app/dashboard" className="px-3 py-1 rounded-lg text-zinc-600 hover:text-zinc-900 transition-colors">
+            🏨 Hostel SaaS Admin
+          </Link>
+          <Link href="/guest/agt_hostel_01" className="px-3 py-1 rounded-lg bg-zinc-900 text-white shadow-xs">
+            💬 Resident AI Chat
+          </Link>
+          <Link href="/platform/dashboard" className="px-3 py-1 rounded-lg text-zinc-600 hover:text-zinc-900 transition-colors">
+            🛡️ Super Admin
+          </Link>
+        </div>
+      </div>
+
       {/* Luxury Hotel Header */}
       <header className="p-5 border-b border-zinc-200 bg-white flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-3">

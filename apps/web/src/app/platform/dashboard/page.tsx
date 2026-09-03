@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Building2, Bot, MessageSquare, DollarSign, Cpu, Activity, ShieldAlert, TrendingUp, ArrowUpRight } from 'lucide-react';
 
 export default function PlatformDashboardPage() {
@@ -27,6 +28,22 @@ export default function PlatformDashboardPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 font-sans">
+      {/* 1-Click Unified Portal Switcher */}
+      <div className="flex items-center justify-between bg-zinc-100 p-1.5 rounded-2xl border border-zinc-200 text-xs font-semibold">
+        <span className="text-zinc-500 font-mono text-[11px] px-3 font-semibold">PORTAL SWITCHER:</span>
+        <div className="flex items-center gap-1">
+          <Link href="/app/dashboard" className="px-3 py-1.5 rounded-xl text-zinc-600 hover:text-zinc-900 transition-colors">
+            🏨 Hostel SaaS Admin
+          </Link>
+          <Link href="/guest/agt_hostel_01" className="px-3 py-1.5 rounded-xl text-zinc-600 hover:text-zinc-900 transition-colors">
+            💬 Resident AI Chat
+          </Link>
+          <Link href="/platform/dashboard" className="px-3 py-1.5 rounded-xl bg-zinc-900 text-white shadow-xs">
+            🛡️ Super Admin Control Plane
+          </Link>
+        </div>
+      </div>
+
       {/* Operator Banner Header */}
       <div className="flex items-center justify-between border-b border-zinc-200 pb-6">
         <div>

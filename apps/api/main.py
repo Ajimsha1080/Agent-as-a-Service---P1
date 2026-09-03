@@ -238,10 +238,15 @@ async def list_agents(organization_id: Optional[str] = "org_azure_group", proper
             for a in agents
         ]
     return [
-        { "id": "agt_concierge_01", "organization_id": "org_azure_group", "property_id": "prop_azure_palm_resort", "name": "Azure Palm Concierge", "agent_type": "CONCIERGE", "status": "ACTIVE", "description": "Predefined head AI concierge assisting guests with amenities, pool hours, dining, and reservations." },
-        { "id": "agt_booking_02", "organization_id": "org_azure_group", "property_id": "prop_azure_palm_resort", "name": "Room Vacancy & Reservation Agent", "agent_type": "BOOKING", "status": "ACTIVE", "description": "Predefined booking agent for checking room rates, availability, and placing guest reservations." },
-        { "id": "agt_dining_03", "organization_id": "org_azure_group", "property_id": "prop_azure_palm_resort", "name": "Dining & Spa Experience Agent", "agent_type": "DINING", "status": "ACTIVE", "description": "Predefined dining assistant for restaurant menus, table reservations, and Ayurvedic spa bookings." },
-        { "id": "agt_support_04", "organization_id": "org_azure_group", "property_id": "prop_azure_palm_resort", "name": "Front Desk Escalation Agent", "agent_type": "SUPPORT", "status": "ACTIVE", "description": "Predefined support agent handling guest complaints and escalating to live front desk staff." }
+        {
+            "id": "agt_hostel_01",
+            "organization_id": "org_azure_group",
+            "property_id": "prop_azure_palm_resort",
+            "name": "Hostel AI Agent",
+            "agent_type": "HOSTEL_AI_AGENT",
+            "status": "ACTIVE",
+            "description": "Autonomous Hostel & Hospitality AI Agent that understands guest questions, decides required tools, executes database actions, and responds in real-time."
+        }
     ]
 
 @app.get("/api/v1/agents/{agent_id}", tags=["Control Plane - Agents"])

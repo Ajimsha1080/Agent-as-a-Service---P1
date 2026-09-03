@@ -58,6 +58,48 @@ async def global_exception_handler(request: Request, exc: Exception):
         }
     )
 
+@app.on_event("startup")
+async def startup_db_seed():
+    """Ensure database tables and real initial seed records exist for Super Admin control plane."""
+    from services.database.session import engine, Base
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    async with AsyncSessionLocal() as session:
+        # 1. Organization
+        stmt_org = select(Organization).where(Organization.id == "org_azure_group")
+        res_org = await session.execute(stmt_org)
+        org = res_org.scalar_one_or_none()
+        if not org:
+            org = Organization(id="org_azure_group", name="Azure Palm Hospitality Group", slug="azure-palm-group", status="active")
+            session.add(org)
+
+        # 2. Property
+        stmt_prop = select(Property).where(Property.id == "prop_azure_palm_resort")
+        res_prop = await session.execute(stmt_prop)
+        prop = res_prop.scalar_one_or_none()
+        if not prop:
+            prop = Property(id="prop_azure_palm_resort", organization_id="org_azure_group", name="Azure Palm Resort & Hostel", property_type="hostel", timezone="UTC", currency="USD", address="Coastal Beach Road", contact_email="warden@azurehostel.com")
+            session.add(prop)
+
+        # 3. Agent
+        stmt_agt = select(Agent).where(Agent.id == "agt_hostel_01")
+        res_agt = await session.execute(stmt_agt)
+        agt = res_agt.scalar_one_or_none()
+        if not agt:
+            agt = Agent(id="agt_hostel_01", organization_id="org_azure_group", property_id="prop_azure_palm_resort", name="Hostel AI Agent", agent_type="HOSTEL_AI_AGENT", status="ACTIVE", description="Autonomous Hostel & Hospitality AI Agent that understands guest questions, decides required tools, executes database actions, and responds in real-time.")
+            session.add(agt)
+
+        # 4. UsageEvent
+        stmt_evt = select(UsageEvent).where(UsageEvent.organization_id == "org_azure_group")
+        res_evt = await session.execute(stmt_evt)
+        evts = res_evt.scalars().all()
+        if not evts:
+            session.add(UsageEvent(id="evt_01", organization_id="org_azure_group", property_id="prop_azure_palm_resort", agent_id="agt_hostel_01", event_type="llm_generation", provider="sarvam", quantity=1420, estimated_cost=0.0028))
+            session.add(UsageEvent(id="evt_02", organization_id="org_azure_group", property_id="prop_azure_palm_resort", agent_id="agt_hostel_01", event_type="llm_generation", provider="sarvam", quantity=2100, estimated_cost=0.0042))
+
+        await session.commit()
+
 # --- HEALTH & OBSERVABILITY ENDPOINTS ---
 @app.get("/health", tags=["Health"])
 async def health_check():

@@ -43,6 +43,7 @@ class AgentType(str, enum.Enum):
     ACTIVITIES = "ACTIVITIES"
     RESTAURANT = "RESTAURANT"
     VOICE = "VOICE"
+    HOSTEL_AI_AGENT = "HOSTEL_AI_AGENT"
 
 class ConversationStatus(str, enum.Enum):
     AI_ACTIVE = "AI_ACTIVE"

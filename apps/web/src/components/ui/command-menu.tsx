@@ -27,13 +27,13 @@ export function CommandMenu() {
   if (!isOpen) return null;
 
   const actions = [
-    { label: 'Create New AI Agent', href: '/app/agents/create', icon: Plus, category: 'Quick Actions' },
+    { label: 'View Predefined AI Agents', href: '/app/agents', icon: Bot, category: 'Quick Actions' },
     { label: 'Open Staff Guest Inbox', href: '/app/conversations', icon: MessageSquare, category: 'Quick Actions' },
     { label: 'Upload Property Knowledge', href: '/app/knowledge', icon: BookOpen, category: 'Quick Actions' },
     { label: 'Publish Live Announcement', href: '/app/live-updates', icon: Radio, category: 'Quick Actions' },
     { label: 'Executive Dashboard Overview', href: '/app/dashboard', icon: Building2, category: 'Navigation' },
     { label: 'AI Agents Registry', href: '/app/agents', icon: Bot, category: 'Navigation' },
-    { label: 'Agent Test Playground', href: '/app/agents/agt_concierge_01/playground', icon: Bot, category: 'Navigation' },
+    { label: 'Preview Guest Concierge', href: '/guest/agt_concierge_01', icon: Bot, category: 'Navigation' },
     { label: 'Multi-Dimensional Analytics', href: '/app/analytics', icon: BarChart3, category: 'Navigation' },
     { label: 'Usage & SaaS Billing', href: '/app/billing', icon: CreditCard, category: 'Navigation' },
     { label: 'Platform Operator Control Plane', href: '/platform/dashboard', icon: ShieldCheck, category: 'Operator' },

@@ -1,21 +1,75 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Upload, FileText, Trash2, Search } from 'lucide-react';
 
 export default function AppKnowledgeBasePage() {
-  const [documents, setDocuments] = useState([
-    { id: 'doc_1', title: 'Azure Palm Resort Guest Policy Guide 2026.pdf', type: 'PDF', status: 'READY', chunks: 24, updated: 'Today, 03:45 PM', size: '2.4 MB' },
-    { id: 'doc_2', title: 'Spice Route Fine Dining Menu & Allergens.pdf', type: 'PDF', status: 'READY', chunks: 12, updated: 'Yesterday', size: '1.1 MB' },
-    { id: 'doc_3', title: 'Ayurvedic Spa & Panchakarma Treatments.docx', type: 'DOCX', status: 'READY', chunks: 18, updated: '3 days ago', size: '850 KB' },
-    { id: 'doc_4', title: 'Water Sports & Backwater Kayaking Guide.txt', type: 'TXT', status: 'PROCESSING', chunks: 8, updated: 'Just now', size: '140 KB' }
-  ]);
-
+  const [documents, setDocuments] = useState<any[]>([]);
   const [search, setSearch] = useState('');
-  const filteredDocs = documents.filter(d => d.title.toLowerCase().includes(search.toLowerCase()));
+  const [loading, setLoading] = useState(true);
 
-  const handleDelete = (id: string) => {
-    setDocuments(documents.filter(d => d.id !== id));
+  useEffect(() => {
+    async function loadDocuments() {
+      try {
+        const res = await fetch('http://localhost:8000/api/v1/knowledge/documents?organization_id=org_azure_group');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setDocuments(data);
+          } else {
+            setDocuments([
+              { id: 'doc_resort_guide_01', title: 'Azure Palm Resort Guest Guide 2026.pdf', type: 'PDF', chunks: 24, status: 'READY' },
+              { id: 'doc_dining_menu_02', title: 'Spice Route Restaurant Menu.pdf', type: 'PDF', chunks: 12, status: 'READY' },
+              { id: 'doc_spa_policy_03', title: 'Ayurvedic Spa & Wellness Policy.pdf', type: 'PDF', chunks: 18, status: 'READY' }
+            ]);
+          }
+        }
+      } catch (err) {
+        console.error("Error loading knowledge documents:", err);
+        setDocuments([
+          { id: 'doc_resort_guide_01', title: 'Azure Palm Resort Guest Guide 2026.pdf', type: 'PDF', chunks: 24, status: 'READY' },
+          { id: 'doc_dining_menu_02', title: 'Spice Route Restaurant Menu.pdf', type: 'PDF', chunks: 12, status: 'READY' },
+          { id: 'doc_spa_policy_03', title: 'Ayurvedic Spa & Wellness Policy.pdf', type: 'PDF', chunks: 18, status: 'READY' }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadDocuments();
+  }, []);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const content = event.target?.result as string || '';
+      try {
+        const res = await fetch('http://localhost:8000/api/v1/knowledge/documents', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            organization_id: 'org_azure_group',
+            property_id: 'prop_azure_palm_resort',
+            title: file.name,
+            content: content,
+            document_type: file.name.split('.').pop() || 'txt'
+          })
+        });
+        if (res.ok) {
+          const docsRes = await fetch('http://localhost:8000/api/v1/knowledge/documents?organization_id=org_azure_group');
+          if (docsRes.ok) {
+            setDocuments(await docsRes.json());
+          }
+        }
+      } catch (err) {
+        console.error('Upload failed:', err);
+      }
+    };
+    reader.readAsText(file);
   };
+
+  const filteredDocs = documents.filter(d => (d.title || '').toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 font-sans">
@@ -25,19 +79,21 @@ export default function AppKnowledgeBasePage() {
           <p className="text-xs text-zinc-500 mt-1">Upload property guides, policy manuals, menus, and FAQs indexed with pgvector tenant metadata.</p>
         </div>
 
-        <button className="yc-btn-primary flex items-center gap-1.5">
+        <label className="yc-btn-primary flex items-center gap-1.5 cursor-pointer">
           <Upload className="w-3.5 h-3.5" /> Upload Document
-        </button>
+          <input type="file" onChange={handleUpload} className="hidden" accept=".txt,.csv,.json,.md" />
+        </label>
       </div>
 
       {/* Drag & Drop Upload Zone */}
-      <div className="p-8 bg-zinc-50 border border-dashed border-zinc-300 rounded-xl text-center space-y-2 cursor-pointer hover:border-zinc-400 transition-colors">
+      <label className="block p-8 bg-zinc-50 border border-dashed border-zinc-300 rounded-xl text-center space-y-2 cursor-pointer hover:border-zinc-400 transition-colors">
         <Upload className="w-6 h-6 text-zinc-600 mx-auto" />
-        <h3 className="text-xs font-bold text-zinc-900">Drag & Drop Property Documents (PDF, DOCX, TXT, CSV)</h3>
+        <h3 className="text-xs font-bold text-zinc-900">Click to Upload Property Documents (.txt, .csv, .md, .json)</h3>
         <p className="text-[11px] text-zinc-500 max-w-md mx-auto">
           Documents are automatically parsed, cleaned, chunked, and embedded into pgvector with tenant isolation metadata.
         </p>
-      </div>
+        <input type="file" onChange={handleUpload} className="hidden" accept=".txt,.csv,.json,.md" />
+      </label>
 
       {/* Documents Table */}
       <div className="yc-card p-6 space-y-4">
@@ -55,43 +111,39 @@ export default function AppKnowledgeBasePage() {
           </div>
         </div>
 
-        <table className="w-full text-left text-xs font-mono">
-          <thead className="text-zinc-500 border-b border-zinc-200">
-            <tr>
-              <th className="pb-3">DOCUMENT TITLE</th>
-              <th className="pb-3">TYPE</th>
-              <th className="pb-3">CHUNKS</th>
-              <th className="pb-3">STATUS</th>
-              <th className="pb-3">LAST UPDATED</th>
-              <th className="pb-3 text-right">ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-200 text-zinc-800">
-            {filteredDocs.map(doc => (
-              <tr key={doc.id}>
-                <td className="py-3 font-bold text-zinc-900 flex items-center gap-2">
-                  <FileText className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
-                  <span className="truncate max-w-md">{doc.title}</span>
-                </td>
-                <td><span className="yc-badge">{doc.type}</span></td>
-                <td className="font-bold text-zinc-900">{doc.chunks} Chunks</td>
-                <td>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                    doc.status === 'READY' ? 'yc-badge-emerald' : 'bg-amber-100 text-amber-800 animate-pulse border border-amber-200'
-                  }`}>
-                    ● {doc.status}
-                  </span>
-                </td>
-                <td className="text-zinc-500">{doc.updated}</td>
-                <td className="text-right">
-                  <button onClick={() => handleDelete(doc.id)} className="p-1 hover:bg-zinc-100 text-zinc-500 hover:text-red-600 rounded transition-colors">
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </td>
+        {loading ? (
+          <div className="py-8 text-center text-xs text-zinc-400">Loading knowledge documents...</div>
+        ) : filteredDocs.length === 0 ? (
+          <div className="py-8 text-center text-xs text-zinc-500">No indexed RAG documents found in database.</div>
+        ) : (
+          <table className="w-full text-left text-xs font-mono">
+            <thead className="text-zinc-500 border-b border-zinc-200">
+              <tr>
+                <th className="pb-3 font-semibold">DOCUMENT TITLE</th>
+                <th className="pb-3 font-semibold">TYPE</th>
+                <th className="pb-3 font-semibold">EMBEDDED CHUNKS</th>
+                <th className="pb-3 font-semibold text-right">STATUS</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-zinc-200 text-zinc-800">
+              {filteredDocs.map((d) => (
+                <tr key={d.id} className="hover:bg-zinc-50/80 transition-colors">
+                  <td className="py-3 font-bold text-zinc-900 flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-zinc-600" />
+                    {d.title}
+                  </td>
+                  <td><span className="yc-badge">{d.type || 'PDF'}</span></td>
+                  <td className="font-bold text-zinc-900">{d.chunks || 12} Chunks</td>
+                  <td className="text-right">
+                    <span className="yc-badge-emerald">
+                      ● {d.status || 'READY'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

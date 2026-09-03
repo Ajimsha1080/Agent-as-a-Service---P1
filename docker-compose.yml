@@ -39,9 +39,12 @@ services:
     restart: always
     ports:
       - "8000:8000"
+    env_file:
+      - .env.production
     environment:
       - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/hospitality_agent_cloud
       - REDIS_URL=redis://redis:6379/0
+      - SARVAM_API_KEY=sk_hfcj1u2e_ZWj7CUgfsUhYTdOs7oHL22My
     depends_on:
       postgres:
         condition: service_healthy

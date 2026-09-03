@@ -4,9 +4,9 @@ import { LucideIcon } from 'lucide-react';
 
 interface EmptyStateProps {
   icon: LucideIcon;
-  title: str;
-  description: str;
-  actionText?: str;
+  title: string;
+  description: string;
+  actionText?: string;
   onAction?: () => void;
 }
 

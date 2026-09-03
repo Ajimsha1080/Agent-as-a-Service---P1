@@ -47,8 +47,8 @@ export default function LandingPage() {
         </p>
 
         <div className="mt-10 flex items-center gap-4">
-          <Link href="/app/agents/create" className="yc-btn-primary px-8 py-3.5 text-sm">
-            Build Your First Agent No-Code
+          <Link href="/app/agents" className="yc-btn-primary px-8 py-3.5 text-sm">
+            Explore Predefined Agents
           </Link>
           <Link href="/guest/agt_concierge_01" className="yc-btn-secondary px-8 py-3.5 text-sm">
             Try Guest Concierge

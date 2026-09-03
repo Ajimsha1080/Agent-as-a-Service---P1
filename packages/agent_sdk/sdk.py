@@ -1,5 +1,5 @@
 import uuid
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 from services.agent_runtime.lifecycle import AgentLifecycleManager
 
 class HospitalityAgentSDK:

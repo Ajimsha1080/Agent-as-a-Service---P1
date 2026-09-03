@@ -19,17 +19,45 @@ export default function OnboardingWizardPage() {
     { num: 1, title: 'Create Property', desc: 'Set property name and location' },
     { num: 2, title: 'Property Information', desc: 'Upload guest guide or policies' },
     { num: 3, title: 'Connect Availability', desc: 'Enable live room & pool tools' },
-    { num: 4, title: 'Create AI Agent', desc: 'Define name, type & personality' },
+    { num: 4, title: 'Select Predefined AI Agent', desc: 'Choose Concierge, Booking, or Support' },
     { num: 5, title: 'Test Agent', desc: 'Try sample guest inquiries' },
     { num: 6, title: 'Deploy', desc: 'Activate agent in production' }
   ];
 
   const progressPct = Math.round((currentStep / steps.length) * 100);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < 6) {
       setCurrentStep(prev => prev + 1);
     } else {
+      try {
+        const propRes = await fetch('http://localhost:8000/api/v1/properties', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            organization_id: 'org_azure_group',
+            name: formData.propertyName,
+            property_type: formData.propertyType,
+            timezone: 'UTC'
+          })
+        });
+        const propData = await propRes.json();
+        const propertyId = propData.id || 'prop_azure_palm_resort';
+
+        await fetch('http://localhost:8000/api/v1/agents', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            organization_id: 'org_azure_group',
+            property_id: propertyId,
+            name: formData.agentName,
+            agent_type: 'CONCIERGE',
+            tone: 'Luxury'
+          })
+        });
+      } catch (err) {
+        console.error('Onboarding sync error:', err);
+      }
       router.push('/app/dashboard');
     }
   };
@@ -153,8 +181,8 @@ export default function OnboardingWizardPage() {
                 <Bot className="w-4 h-4" />
               </div>
               <div>
-                <h2 className="text-sm font-bold text-zinc-900">STEP 4: Create AI Agent</h2>
-                <p className="text-[11px] text-zinc-500">Define agent name and primary communication language.</p>
+                <h2 className="text-sm font-bold text-zinc-900">STEP 4: Select Predefined AI Agent</h2>
+                <p className="text-[11px] text-zinc-500">Select pre-configured enterprise agent template for your property.</p>
               </div>
             </div>
 

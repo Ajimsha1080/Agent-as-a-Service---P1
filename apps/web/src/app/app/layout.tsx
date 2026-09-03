@@ -16,7 +16,6 @@ export default function OrganizationAppLayout({ children }: { children: React.Re
     { name: 'Setup Wizard', href: '/app/onboarding', icon: Sparkles },
     { name: 'Properties', href: '/app/properties', icon: Building2 },
     { name: 'Agents', href: '/app/agents', icon: Bot },
-    { name: 'Agent Builder', href: '/app/agents/create', icon: Bot, highlight: true },
     { name: 'Guest Inbox', href: '/app/conversations', icon: MessageSquare },
     { name: 'Knowledge RAG', href: '/app/knowledge', icon: BookOpen },
     { name: 'Live Operations', href: '/app/live-updates', icon: Radio },
@@ -65,8 +64,6 @@ export default function OrganizationAppLayout({ children }: { children: React.Re
                   className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
                     isActive
                       ? 'bg-zinc-100 text-zinc-900 font-semibold border border-zinc-200'
-                      : item.highlight
-                      ? 'bg-zinc-900 hover:bg-zinc-800 text-white font-semibold shadow-xs'
                       : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50'
                   }`}
                 >
@@ -125,8 +122,8 @@ export default function OrganizationAppLayout({ children }: { children: React.Re
             <Link href="/guest/agt_concierge_01" className="yc-btn-secondary">
               Preview Guest Concierge
             </Link>
-            <Link href="/app/agents/create" className="yc-btn-primary">
-              + New Agent
+            <Link href="/app/agents" className="yc-btn-primary">
+              Predefined Agents
             </Link>
           </div>
         </header>

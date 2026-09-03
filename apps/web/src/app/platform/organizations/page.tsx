@@ -1,16 +1,30 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Building2, Plus, Search, Edit, Trash2 } from 'lucide-react';
 
 export default function PlatformOrganizationsPage() {
-  const [orgs] = useState([
-    { id: 'org_azure_group', name: 'Azure Hospitality Group', slug: 'azure-hospitality-group', plan: 'BUSINESS', mrr: '$499/mo', properties: 2, agents: 4, status: 'ACTIVE' },
-    { id: 'org_grand_palace', name: 'Grand Palace Hotels & Resorts', slug: 'grand-palace-hotels', plan: 'ENTERPRISE', mrr: '$2,499/mo', properties: 14, agents: 38, status: 'ACTIVE' },
-    { id: 'org_coastal_hostels', name: 'Coastal Paradise Hostels', slug: 'coastal-paradise-hostels', plan: 'STARTER', mrr: '$149/mo', properties: 1, agents: 2, status: 'ACTIVE' }
-  ]);
-
+  const [orgs, setOrgs] = useState<any[]>([]);
   const [search, setSearch] = useState('');
-  const filtered = orgs.filter(o => o.name.toLowerCase().includes(search.toLowerCase()));
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadOrgs() {
+      try {
+        const res = await fetch('http://localhost:8000/api/v1/organizations');
+        if (res.ok) {
+          const data = await res.json();
+          setOrgs(data);
+        }
+      } catch (err) {
+        console.error("Error loading organizations:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadOrgs();
+  }, []);
+
+  const filtered = orgs.filter(o => (o.name || '').toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 font-sans">
@@ -40,42 +54,34 @@ export default function PlatformOrganizationsPage() {
           </div>
         </div>
 
-        <table className="w-full text-left text-xs font-mono">
-          <thead className="text-zinc-500 border-b border-zinc-200">
-            <tr>
-              <th className="pb-3">ORGANIZATION NAME</th>
-              <th className="pb-3">PLAN</th>
-              <th className="pb-3">PROPERTIES</th>
-              <th className="pb-3">ACTIVE AGENTS</th>
-              <th className="pb-3">MRR</th>
-              <th className="pb-3">STATUS</th>
-              <th className="pb-3 text-right">ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-200 text-zinc-800">
-            {filtered.map(o => (
-              <tr key={o.id}>
-                <td className="py-3 font-bold text-zinc-900">
-                  {o.name}
-                  <span className="block text-[10px] text-zinc-500 font-normal">{o.slug}</span>
-                </td>
-                <td>
-                  <span className="yc-badge">
-                    {o.plan}
-                  </span>
-                </td>
-                <td>{o.properties} Properties</td>
-                <td className="font-bold text-zinc-900">{o.agents} Active</td>
-                <td className="font-bold text-zinc-900">{o.mrr}</td>
-                <td><span className="yc-badge-emerald">● {o.status}</span></td>
-                <td className="text-right space-x-2">
-                  <button className="p-1 hover:bg-zinc-100 rounded text-zinc-500 hover:text-zinc-900"><Edit className="w-3.5 h-3.5" /></button>
-                  <button className="p-1 hover:bg-zinc-100 rounded text-zinc-500 hover:text-red-600"><Trash2 className="w-3.5 h-3.5" /></button>
-                </td>
+        {loading ? (
+          <div className="py-8 text-center text-xs text-zinc-400">Loading customer organizations...</div>
+        ) : filtered.length === 0 ? (
+          <div className="py-8 text-center text-xs text-zinc-500">No organizations found in database.</div>
+        ) : (
+          <table className="w-full text-left text-xs font-mono">
+            <thead className="text-zinc-500 border-b border-zinc-200">
+              <tr>
+                <th className="pb-3">ORGANIZATION NAME</th>
+                <th className="pb-3">SLUG</th>
+                <th className="pb-3">ID</th>
+                <th className="pb-3">STATUS</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-zinc-200 text-zinc-800">
+              {filtered.map(o => (
+                <tr key={o.id}>
+                  <td className="py-3 font-bold text-zinc-900">
+                    {o.name}
+                  </td>
+                  <td><span className="yc-badge">{o.slug}</span></td>
+                  <td className="text-zinc-500 font-mono">{o.id}</td>
+                  <td className="text-emerald-600 font-bold">● {o.status || 'ACTIVE'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

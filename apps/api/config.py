@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/0"
 
     OPENAI_API_KEY: Optional[str] = "sk-mock-openai-key-for-dev"
+    SARVAM_API_KEY: Optional[str] = None
     ANTHROPIC_API_KEY: Optional[str] = "sk-mock-anthropic-key-for-dev"
     GOOGLE_API_KEY: Optional[str] = "mock-google-key-for-dev"
 

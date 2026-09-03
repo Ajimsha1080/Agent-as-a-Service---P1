@@ -4,16 +4,15 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Root path redirect to Landing Page or App Dashboard
-  if (pathname === '/') {
-    return NextResponse.next();
+  // Legacy route redirect
+  if (pathname.startsWith('/dashboard')) {
+    return NextResponse.redirect(new URL('/app/dashboard', request.url));
   }
 
   // 1. STRICT ROUTE GUARD: Platform Owner UI (/platform/*)
   if (pathname.startsWith('/platform')) {
     const userRole = request.cookies.get('user_role')?.value || 'SUPER_ADMIN'; // Demo default or cookie
     if (userRole !== 'SUPER_ADMIN') {
-      // Forbidden: Redirect non-superadmins away from /platform/* to /app/dashboard
       return NextResponse.redirect(new URL('/app/dashboard', request.url));
     }
   }
@@ -22,7 +21,6 @@ export function middleware(request: NextRequest) {
   if (pathname.startsWith('/app')) {
     const userRole = request.cookies.get('user_role')?.value || 'ORGANIZATION_ADMIN';
     if (userRole === 'GUEST') {
-      // Reject Guests from accessing Organization Admin Portal
       return NextResponse.redirect(new URL('/guest/agt_concierge_01', request.url));
     }
   }
@@ -31,5 +29,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/platform/:path*', '/app/:path*', '/guest/:path*']
+  matcher: ['/dashboard/:path*', '/platform/:path*', '/app/:path*', '/guest/:path*']
 };

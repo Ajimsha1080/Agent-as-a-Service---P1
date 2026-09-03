@@ -75,8 +75,8 @@ export default function AppKnowledgeBasePage() {
     <div className="max-w-6xl mx-auto space-y-8 font-sans">
       <div className="flex items-center justify-between border-b border-zinc-200 pb-6">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900">Knowledge Base & RAG Indexing</h1>
-          <p className="text-xs text-zinc-500 mt-1">Upload property guides, policy manuals, menus, and FAQs indexed with pgvector tenant metadata.</p>
+          <h1 className="text-2xl font-bold text-zinc-900">Property Knowledge Base & Guest Guides</h1>
+          <p className="text-xs text-zinc-500 mt-1">Upload resort policy manuals, menus, and FAQs so AI agents answer guest questions with 100% accuracy.</p>
         </div>
 
         <label className="yc-btn-primary flex items-center gap-1.5 cursor-pointer">

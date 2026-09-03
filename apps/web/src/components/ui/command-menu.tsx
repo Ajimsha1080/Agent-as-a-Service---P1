@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  Search, Bot, Building2, BookOpen, Radio, MessageSquare, BarChart3, CreditCard, Plus, ArrowRight, X, ShieldCheck 
+  Search, Bot, Building2, BookOpen, Radio, MessageSquare, BarChart3, CreditCard, Plus, ArrowRight, X, ShieldCheck, Sparkles 
 } from 'lucide-react';
 
 export function CommandMenu() {
@@ -27,6 +27,7 @@ export function CommandMenu() {
   if (!isOpen) return null;
 
   const actions = [
+    { label: 'Onboard New Property Wizard', href: '/app/onboarding', icon: Sparkles, category: 'Quick Actions' },
     { label: 'View Predefined AI Agents', href: '/app/agents', icon: Bot, category: 'Quick Actions' },
     { label: 'Open Staff Guest Inbox', href: '/app/conversations', icon: MessageSquare, category: 'Quick Actions' },
     { label: 'Upload Property Knowledge', href: '/app/knowledge', icon: BookOpen, category: 'Quick Actions' },

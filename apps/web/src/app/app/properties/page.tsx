@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Building2, Plus, Bot, MapPin, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Building2, Plus, Bot, MapPin, CheckCircle2, ChevronRight, Sparkles } from 'lucide-react';
 
 export default function AppPropertiesPage() {
   const [properties, setProperties] = useState<any[]>([]);
@@ -43,9 +43,9 @@ export default function AppPropertiesPage() {
           <p className="text-xs text-zinc-500 mt-1">Configure resorts, hotels, hostels, and vacation properties bound to your organization.</p>
         </div>
 
-        <button className="yc-btn-primary flex items-center gap-1.5">
-          <Plus className="w-3.5 h-3.5" /> Add Property
-        </button>
+        <Link href="/app/onboarding" className="yc-btn-primary flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5" /> Onboard New Property Wizard
+        </Link>
       </div>
 
       {loading ? (

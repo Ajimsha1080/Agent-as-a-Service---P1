@@ -48,6 +48,22 @@ export default function AppAgentsPage() {
         </span>
       </div>
 
+      {/* Product Clarity Guide Banner */}
+      <div className="p-4 bg-zinc-900 text-white rounded-2xl flex items-center justify-between text-xs shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center font-bold text-emerald-400">
+            💡
+          </div>
+          <div>
+            <h3 className="font-bold text-sm text-white">How Predefined AI Agents Work</h3>
+            <p className="text-zinc-400 text-[11px]">These 4 pre-configured agents handle Guest Concierge, PMS Bookings, Dining/Spa, and Staff Escalations out of the box with zero setup required.</p>
+          </div>
+        </div>
+        <Link href="/guest/agt_concierge_01" className="yc-btn-secondary bg-white text-zinc-900 hover:bg-zinc-100 text-xs shrink-0">
+          Try Live Demo ➔
+        </Link>
+      </div>
+
       {loading ? (
         <div className="py-12 text-center text-xs text-zinc-400">Loading AI agents from database...</div>
       ) : agents.length === 0 ? (

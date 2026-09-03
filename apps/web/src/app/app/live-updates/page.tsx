@@ -112,8 +112,8 @@ export default function AppLiveUpdatesPage() {
       {/* Header */}
       <div className="flex items-center justify-between border-b border-zinc-200 pb-6">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900">Live Property Operations Status</h1>
-          <p className="text-xs text-zinc-500 mt-1">Staff console to publish instant status changes for pool, spa, dining, and facilities.</p>
+          <h1 className="text-2xl font-bold text-zinc-900">Live Property Alerts & Announcements</h1>
+          <p className="text-xs text-zinc-500 mt-1">Publish instant status changes (pool closures, weather alerts, daily specials) that update AI agent responses in real-time.</p>
         </div>
 
         <button 

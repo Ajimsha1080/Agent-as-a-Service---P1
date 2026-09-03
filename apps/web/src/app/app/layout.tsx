@@ -13,12 +13,11 @@ export default function OrganizationAppLayout({ children }: { children: React.Re
 
   const navItems = [
     { name: 'Overview', href: '/app/dashboard', icon: Home },
-    { name: 'Setup Wizard', href: '/app/onboarding', icon: Sparkles },
     { name: 'Properties', href: '/app/properties', icon: Building2 },
-    { name: 'Agents', href: '/app/agents', icon: Bot },
-    { name: 'Guest Inbox', href: '/app/conversations', icon: MessageSquare },
-    { name: 'Knowledge RAG', href: '/app/knowledge', icon: BookOpen },
-    { name: 'Live Operations', href: '/app/live-updates', icon: Radio },
+    { name: 'AI Agents', href: '/app/agents', icon: Bot },
+    { name: 'Staff Intercom', href: '/app/conversations', icon: MessageSquare },
+    { name: 'Knowledge Base', href: '/app/knowledge', icon: BookOpen },
+    { name: 'Live Alerts', href: '/app/live-updates', icon: Radio },
     { name: 'Analytics', href: '/app/analytics', icon: BarChart3 },
     { name: 'Billing & Limits', href: '/app/billing', icon: CreditCard },
   ];

@@ -67,7 +67,7 @@ export default function AppConversationsInboxPage() {
       {/* LEFT COLUMN: Conversation List */}
       <div className="lg:col-span-3 bg-white border border-zinc-200 rounded-2xl flex flex-col overflow-hidden shadow-xs">
         <div className="p-4 border-b border-zinc-200 bg-zinc-50 flex items-center justify-between">
-          <h2 className="font-bold text-sm text-zinc-900">Staff Inbox</h2>
+          <h2 className="font-bold text-sm text-zinc-900">Staff Intercom & Human Takeover</h2>
           <span className="yc-badge">
             {conversations.length} Active
           </span>

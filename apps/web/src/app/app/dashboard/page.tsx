@@ -23,8 +23,8 @@ export default function SaaSUserDashboard() {
           fetch('http://localhost:8000/api/v1/analytics?organization_id=org_azure_group').then(r => r.ok ? r.json() : {})
         ]);
 
-        const defaultProps = [{ id: 'prop_azure_palm_resort', name: 'Azure Palm Resort & Spa', property_type: 'resort', status: 'ACTIVE' }];
-        const defaultAgents = [{ id: 'agt_concierge_01', name: 'Azure Palm Concierge', agent_type: 'CONCIERGE', status: 'ACTIVE' }];
+        const defaultProps = [{ id: 'prop_azure_palm_resort', name: 'Azure Palm Hostel & Campus Residence', property_type: 'hostel', status: 'ACTIVE' }];
+        const defaultAgents = [{ id: 'agt_hostel_01', name: 'Hostel AI Agent', agent_type: 'HOSTEL_AI_AGENT', status: 'ACTIVE' }];
 
         setProperties(Array.isArray(propsRes) && propsRes.length > 0 ? propsRes : defaultProps);
         setAgents(Array.isArray(agentsRes) && agentsRes.length > 0 ? agentsRes : defaultAgents);
@@ -32,8 +32,8 @@ export default function SaaSUserDashboard() {
         if (analyticsRes && Object.keys(analyticsRes).length > 0) setAnalytics(analyticsRes);
       } catch (err) {
         console.error("Error loading real-time dashboard data:", err);
-        setProperties([{ id: 'prop_azure_palm_resort', name: 'Azure Palm Resort & Spa', property_type: 'resort', status: 'ACTIVE' }]);
-        setAgents([{ id: 'agt_concierge_01', name: 'Azure Palm Concierge', agent_type: 'CONCIERGE', status: 'ACTIVE' }]);
+        setProperties([{ id: 'prop_azure_palm_resort', name: 'Azure Palm Hostel & Campus Residence', property_type: 'hostel', status: 'ACTIVE' }]);
+        setAgents([{ id: 'agt_hostel_01', name: 'Hostel AI Agent', agent_type: 'HOSTEL_AI_AGENT', status: 'ACTIVE' }]);
       } finally {
         setLoading(false);
       }
@@ -47,19 +47,19 @@ export default function SaaSUserDashboard() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-200 pb-6">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="yc-badge">TENANT: AZURE HOSPITALITY GROUP</span>
+            <span className="yc-badge">TENANT: AZURE HOSTEL GROUP</span>
             <span className="yc-badge-emerald">● REAL-TIME ONLINE</span>
           </div>
-          <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Good morning, Azure Group</h1>
-          <p className="text-xs text-zinc-600 mt-1">Here is your hospitality AI workforce telemetry and live guest support performance.</p>
+          <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Hostel SaaS Admin Portal</h1>
+          <p className="text-xs text-zinc-600 mt-1">Here is your Hostel AI Agent workforce telemetry, live resident support performance, and real-time timings.</p>
         </div>
 
         <div className="flex items-center gap-3">
-          <Link href="/app/onboarding" className="yc-btn-secondary flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-zinc-700" /> Run Setup Wizard
+          <Link href="/app/onboarding" className="yc-btn-secondary flex items-center gap-1.5 text-xs">
+            <Sparkles className="w-3.5 h-3.5 text-zinc-700" /> + Onboard Hostel Property
           </Link>
-          <Link href="/app/agents" className="yc-btn-primary flex items-center gap-1.5">
-            <Bot className="w-3.5 h-3.5" /> Predefined Agents Catalog
+          <Link href="/app/agents" className="yc-btn-primary flex items-center gap-1.5 text-xs">
+            <Bot className="w-3.5 h-3.5" /> Hostel AI Agent
           </Link>
         </div>
       </div>

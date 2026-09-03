@@ -38,7 +38,19 @@ class HospitalityToolRegistry:
             "getRequestStatus": "get_request_status",
             "getNotices": "get_notices",
             "getFoodMenu": "get_food_menu",
-            "escalateToStaff": "escalate_to_staff"
+            "escalateToStaff": "escalate_to_staff",
+            "get_hostel_info": "get_hostel_info",
+            "getHostelInfo": "get_hostel_info",
+            "get_room_info": "get_room_details",
+            "getRoomInfo": "get_room_details",
+            "get_meal_timing": "get_food_menu",
+            "getMealTiming": "get_food_menu",
+            "get_current_notices": "get_notices",
+            "getCurrentNotices": "get_notices",
+            "get_maintenance_status": "get_request_status",
+            "getMaintenanceStatus": "get_request_status",
+            "get_reservation_status": "get_resident_info",
+            "getReservationStatus": "get_resident_info"
         }
         if tool_name in name_map:
             normalized_name = name_map[tool_name]
@@ -61,6 +73,9 @@ class HospitalityToolRegistry:
             return {"success": False, "tool": tool_name, "error": str(e)}
 
     # --- EXPLICIT HOSTEL AI AGENT TOOL IMPLEMENTATIONS ---
+
+    async def tool_get_hostel_info(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
+        return await self.tool_get_property_details(args, organization_id, property_id)
 
     async def tool_search_knowledge(self, args: Dict[str, Any], organization_id: str, property_id: str) -> str:
         query = args.get("query", "")

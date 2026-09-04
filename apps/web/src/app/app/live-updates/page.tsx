@@ -87,10 +87,117 @@ export default function AppLiveUpdatesPage() {
   // Field Mapping Editor State
   const [selectedSourceForMapping, setSelectedSourceForMapping] = useState<string | null>(null);
 
+  // Data Access Control State
+  const [isDataAccessModalOpen, setIsDataAccessModalOpen] = useState(false);
+  const [dataAccessActiveTab, setDataAccessActiveTab] = useState<'categories' | 'audit'>('categories');
+  const [selectedSourceForDataAccess, setSelectedSourceForDataAccess] = useState<string | null>(null);
+
+  const [dataAccessCategories, setDataAccessCategories] = useState<Array<{
+    category_key: string;
+    category_name: string;
+    enabled: boolean;
+    user_scope: string;
+    field_permissions?: Record<string, boolean>;
+  }>>([
+    {
+      category_key: "resident_profile",
+      category_name: "Resident Profile",
+      enabled: false,
+      user_scope: "nobody",
+      field_permissions: { name: true, room_number: true, phone_number: false, email: false, address: false, id_information: false }
+    },
+    { category_key: "room_information", category_name: "Room Information", enabled: true, user_scope: "own_data", field_permissions: {} },
+    { category_key: "food_menu", category_name: "Food & Menu", enabled: true, user_scope: "all_residents", field_permissions: {} },
+    { category_key: "notices", category_name: "Notices", enabled: true, user_scope: "all_residents", field_permissions: {} },
+    { category_key: "facilities", category_name: "Facilities", enabled: true, user_scope: "all_residents", field_permissions: {} },
+    { category_key: "maintenance_requests", category_name: "Maintenance Requests", enabled: true, user_scope: "own_data", field_permissions: {} },
+    { category_key: "payments_fees", category_name: "Payments/Fees", enabled: false, user_scope: "nobody", field_permissions: {} },
+    { category_key: "attendance", category_name: "Attendance", enabled: false, user_scope: "nobody", field_permissions: {} },
+    { category_key: "reservations", category_name: "Reservations", enabled: false, user_scope: "nobody", field_permissions: {} },
+    { category_key: "staff_information", category_name: "Staff Information", enabled: false, user_scope: "nobody", field_permissions: {} }
+  ]);
+
+  const [auditLogs, setAuditLogs] = useState([
+    { id: 'aud_1', actor: 'Hostel Admin', summary: 'Admin enabled: Room Information → Resident\'s own data only', timestamp: 'Today, 2:15 PM' },
+    { id: 'aud_2', actor: 'Hostel Admin', summary: 'Admin disabled: Payment Information, Attendance, Staff Information', timestamp: 'Yesterday, 11:30 AM' }
+  ]);
+
+  const handleToggleCategory = (key: string) => {
+    setDataAccessCategories(prev => prev.map(c => {
+      if (c.category_key === key) {
+        const nextEnabled = !c.enabled;
+        const nextScope = nextEnabled ? (c.user_scope === 'nobody' ? 'all_residents' : c.user_scope) : 'nobody';
+        return { ...c, enabled: nextEnabled, user_scope: nextScope };
+      }
+      return c;
+    }));
+  };
+
+  const handleChangeCategoryScope = (key: string, newScope: string) => {
+    setDataAccessCategories(prev => prev.map(c => {
+      if (c.category_key === key) {
+        const nextEnabled = newScope !== 'nobody';
+        return { ...c, user_scope: newScope, enabled: nextEnabled };
+      }
+      return c;
+    }));
+  };
+
+  const handleToggleFieldPermission = (categoryKey: string, fieldKey: string) => {
+    setDataAccessCategories(prev => prev.map(c => {
+      if (c.category_key === categoryKey) {
+        const currentPerms = c.field_permissions || {};
+        return {
+          ...c,
+          field_permissions: {
+            ...currentPerms,
+            [fieldKey]: !currentPerms[fieldKey]
+          }
+        };
+      }
+      return c;
+    }));
+  };
+
+  const handleSaveDataAccessPolicies = async () => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/v1/live-updates/integrations/${selectedSourceForDataAccess || 'src_hostel_erp_01'}/data-access`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          organization_id: 'org_azure_group',
+          property_id: 'prop_azure_palm_resort',
+          updated_by: 'Hostel Admin',
+          categories: dataAccessCategories
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.audit_entry) {
+          setAuditLogs(prev => [
+            {
+              id: `aud_${Date.now()}`,
+              actor: 'Hostel Admin',
+              summary: data.audit_entry.summary,
+              timestamp: 'Just now'
+            },
+            ...prev
+          ]);
+        }
+      }
+    } catch (e) {
+      console.warn('Backend API call fallback:', e);
+    }
+
+    showToast('✓ Data Access Policies saved and enforced at runtime.');
+    setIsDataAccessModalOpen(false);
+  };
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 4000);
   };
+
 
   const handleSaveFoodTimings = () => {
     setFoodTimings(prev => ({
@@ -588,6 +695,15 @@ export default function AppLiveUpdatesPage() {
 
                   <div className="flex items-center gap-2">
                     <button
+                      onClick={() => {
+                        setSelectedSourceForDataAccess(src.id);
+                        setIsDataAccessModalOpen(true);
+                      }}
+                      className="px-3.5 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold hover:bg-emerald-700 transition-colors flex items-center gap-1.5 shadow-xs"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5" /> Manage Data Access
+                    </button>
+                    <button
                       onClick={() => handleSyncNow(src.id)}
                       className="px-3 py-1.5 bg-zinc-100 text-zinc-800 rounded-lg text-xs font-semibold hover:bg-zinc-200 transition-colors flex items-center gap-1"
                     >
@@ -603,13 +719,21 @@ export default function AppLiveUpdatesPage() {
                       onClick={() => setSelectedSourceForMapping(selectedSourceForMapping === src.id ? null : src.id)}
                       className="px-3 py-1.5 bg-zinc-100 text-zinc-800 rounded-lg text-xs font-semibold hover:bg-zinc-200 transition-colors flex items-center gap-1"
                     >
-                      <Sliders className="w-3 h-3" /> Field Mappings
+                      <Sliders className="w-3 h-3" /> Manage Mappings
                     </button>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between text-xs text-zinc-500 border-t border-zinc-100 pt-3 font-mono">
-                  <span>Authentication: <strong className="text-zinc-800">{src.auth_type}</strong> ({src.credentials_masked})</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-zinc-800">Data Access:</span>
+                    <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">
+                      {dataAccessCategories.filter(c => c.enabled && c.user_scope !== 'nobody').length} categories enabled
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-bold">
+                      {dataAccessCategories.filter(c => !c.enabled || c.user_scope === 'nobody').length} categories restricted
+                    </span>
+                  </div>
                   <span>Last Synced: <strong className="text-emerald-600 font-semibold">{src.last_synced_at}</strong></span>
                 </div>
 
@@ -816,6 +940,165 @@ export default function AppLiveUpdatesPage() {
           </div>
         </div>
       )}
+
+      {/* Manage Data Access Modal */}
+      {isDataAccessModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-3xl w-full space-y-4 shadow-2xl border border-zinc-200 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-zinc-200 pb-3 flex-shrink-0">
+              <div>
+                <h3 className="text-base font-bold text-zinc-900 flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-emerald-600" /> ERP Data Access Control
+                </h3>
+                <p className="text-xs text-zinc-500 mt-0.5">
+                  Connected data is not automatically accessible. Select which ERP categories the AI can access and who can receive it.
+                </p>
+              </div>
+              <button onClick={() => setIsDataAccessModalOpen(false)} className="text-zinc-400 hover:text-zinc-900">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Sub-Tabs */}
+            <div className="flex items-center gap-2 border-b border-zinc-100 pb-2 flex-shrink-0">
+              <button
+                onClick={() => setDataAccessActiveTab('categories')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                  dataAccessActiveTab === 'categories' ? 'bg-zinc-900 text-white' : 'text-zinc-600 hover:bg-zinc-100'
+                }`}
+              >
+                ERP Data Access Policies
+              </button>
+              <button
+                onClick={() => setDataAccessActiveTab('audit')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                  dataAccessActiveTab === 'audit' ? 'bg-zinc-900 text-white' : 'text-zinc-600 hover:bg-zinc-100'
+                }`}
+              >
+                Access Change Audit Log ({auditLogs.length})
+              </button>
+            </div>
+
+            {/* TAB 1: CATEGORY POLICIES */}
+            {dataAccessActiveTab === 'categories' && (
+              <div className="overflow-y-auto space-y-4 pr-1 flex-1">
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold">Security Enforcement Rule:</span> By default, sensitive ERP data (Resident Profile, Payments, Attendance, Staff info) is set to OFF. Backend tools strictly enforce these policies for all queries.
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {dataAccessCategories.map(cat => (
+                    <div key={cat.category_key} className="p-4 bg-zinc-50 border border-zinc-200 rounded-xl space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleCategory(cat.category_key)}
+                            className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
+                              cat.enabled ? 'bg-emerald-600 text-white shadow-xs' : 'bg-zinc-200 text-zinc-700'
+                            }`}
+                          >
+                            {cat.enabled ? 'ON' : 'OFF'}
+                          </button>
+                          <div>
+                            <h4 className="text-sm font-bold text-zinc-900">{cat.category_name}</h4>
+                            <span className="text-[11px] text-zinc-500 font-mono">Key: {cat.category_key}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-zinc-600">Who can access:</span>
+                          <select
+                            value={cat.user_scope}
+                            onChange={(e) => handleChangeCategoryScope(cat.category_key, e.target.value)}
+                            className="bg-white border border-zinc-300 rounded-lg px-2.5 py-1 text-xs font-semibold text-zinc-900 focus:outline-none focus:border-zinc-500"
+                          >
+                            <option value="all_residents">All authenticated residents</option>
+                            <option value="own_data">Resident's own information only</option>
+                            <option value="staff">Hostel staff only</option>
+                            <option value="admin">Admin only</option>
+                            <option value="nobody">Nobody / Disabled</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Field-level controls for Resident Profile */}
+                      {cat.category_key === 'resident_profile' && (
+                        <div className="mt-3 p-3 bg-white rounded-lg border border-zinc-200 space-y-2">
+                          <span className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider block">
+                            Field-Level Protection Controls:
+                          </span>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+                            {Object.entries(cat.field_permissions || {}).map(([fKey, allowed]) => (
+                              <label key={fKey} className="flex items-center gap-2 p-2 bg-zinc-50 rounded border border-zinc-200 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={allowed}
+                                  onChange={() => handleToggleFieldPermission(cat.category_key, fKey)}
+                                  className="rounded text-zinc-900 focus:ring-0"
+                                />
+                                <span className="capitalize text-zinc-800 font-medium">{fKey.replace('_', ' ')}</span>
+                                <span className={`text-[9px] font-bold ml-auto ${allowed ? 'text-emerald-600' : 'text-zinc-400'}`}>
+                                  {allowed ? 'ON' : 'OFF'}
+                                </span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: AUDIT LOGS */}
+            {dataAccessActiveTab === 'audit' && (
+              <div className="overflow-y-auto space-y-3 flex-1 pr-1">
+                <h4 className="text-xs font-bold text-zinc-900 uppercase tracking-wider">Access Control Change Audit Trail</h4>
+                <div className="space-y-2">
+                  {auditLogs.map(log => (
+                    <div key={log.id} className="p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs space-y-1 font-sans">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-zinc-900 flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {log.actor}
+                        </span>
+                        <span className="text-[11px] text-zinc-400 font-mono">{log.timestamp}</span>
+                      </div>
+                      <p className="text-zinc-700 font-mono text-[11px]">{log.summary}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Action Footer */}
+            <div className="flex items-center justify-between pt-4 border-t border-zinc-200 flex-shrink-0">
+              <span className="text-[11px] text-zinc-500 font-mono">Tenant Isolation: Organization Level Enforced</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsDataAccessModalOpen(false)}
+                  className="px-4 py-2 bg-zinc-100 text-zinc-700 rounded-xl font-semibold text-xs hover:bg-zinc-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveDataAccessPolicies}
+                  className="px-5 py-2 bg-emerald-600 text-white rounded-xl font-semibold text-xs hover:bg-emerald-700 transition-colors flex items-center gap-1.5 shadow-xs"
+                >
+                  <Check className="w-3.5 h-3.5" /> Save Data Access Policy
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

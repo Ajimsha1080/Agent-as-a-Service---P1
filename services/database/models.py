@@ -252,6 +252,22 @@ class IntegrationSource(Base):
     last_synced_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=get_utc_now)
 
+class DataAccessPolicy(Base):
+    __tablename__ = "data_access_policies"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=generate_uuid)
+    organization_id: Mapped[str] = mapped_column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    property_id: Mapped[str] = mapped_column(String(36), ForeignKey("properties.id", ondelete="CASCADE"), nullable=False, index=True)
+    integration_source_id: Mapped[Optional[str]] = mapped_column(String(36), ForeignKey("integration_sources.id", ondelete="CASCADE"), nullable=True, index=True)
+    category_key: Mapped[str] = mapped_column(String(100), nullable=False)
+    category_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    user_scope: Mapped[str] = mapped_column(String(50), default="nobody")
+    field_permissions: Mapped[dict] = mapped_column(JSON, default=dict)
+    updated_by: Mapped[str] = mapped_column(String(255), default="Hostel Admin")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=get_utc_now)
+
+
 class Reservation(Base):
     __tablename__ = "reservations"
 

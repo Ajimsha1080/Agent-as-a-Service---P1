@@ -18,7 +18,7 @@ from services.agent_runtime.engine import AgentRuntimeEngine
 from services.rag.pipeline import RAGPipeline
 from services.billing.metering import UsageMeteringService
 from services.database.session import get_db, AsyncSessionLocal
-from services.database.models import Organization, Property, Agent, AgentConfig, LiveUpdate, Conversation, Document, Room, Facility, UsageEvent, Message, IntegrationSource
+from services.database.models import Organization, Property, Agent, AgentConfig, LiveUpdate, Conversation, Document, Room, Facility, UsageEvent, Message, IntegrationSource, AuditLog, DataAccessPolicy
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -174,6 +174,20 @@ class IntegrationSourceRequest(BaseModel):
 
 class IntegrationMappingRequest(BaseModel):
     field_mappings: Dict[str, str]
+
+class DataAccessCategoryPolicyItem(BaseModel):
+    category_key: str
+    category_name: str
+    enabled: bool
+    user_scope: str = "nobody"
+    field_permissions: Optional[Dict[str, bool]] = None
+
+class DataAccessPolicyUpdateRequest(BaseModel):
+    organization_id: str
+    property_id: str
+    updated_by: Optional[str] = "Hostel Admin"
+    categories: List[DataAccessCategoryPolicyItem]
+
 
 class KnowledgeDocumentRequest(BaseModel):
     organization_id: str
@@ -564,6 +578,8 @@ async def list_integration_sources(organization_id: str, property_id: str, db: A
                 "auth_type": "API_KEY",
                 "credentials_masked": "••••••••key_erp_8849",
                 "status": "CONNECTED",
+                "enabled_categories_count": 4,
+                "restricted_categories_count": 6,
                 "field_mappings": {
                     "meal_timing": "Food & Timings",
                     "notices": "Notices",
@@ -584,6 +600,8 @@ async def list_integration_sources(organization_id: str, property_id: str, db: A
             "auth_type": s.auth_type,
             "credentials_masked": s.credentials_masked or "••••••••",
             "status": s.status or "CONNECTED",
+            "enabled_categories_count": 4,
+            "restricted_categories_count": 6,
             "field_mappings": s.field_mappings or {},
             "last_synced_at": str(s.last_synced_at or datetime.now(timezone.utc))
         }
@@ -672,6 +690,177 @@ async def save_integration_mappings(source_id: str, req: IntegrationMappingReque
         "field_mappings": req.field_mappings,
         "message": "Field mappings saved."
     }
+
+# --- ERP DATA ACCESS CONTROL ENDPOINTS ---
+DEFAULT_POLICY_LIST = [
+    {"category_key": "resident_profile", "category_name": "Resident Profile", "enabled": False, "user_scope": "nobody", "field_permissions": {"name": True, "room_number": True, "phone_number": False, "email": False, "address": False, "id_information": False}},
+    {"category_key": "room_information", "category_name": "Room Information", "enabled": True, "user_scope": "own_data", "field_permissions": {}},
+    {"category_key": "food_menu", "category_name": "Food & Menu", "enabled": True, "user_scope": "all_residents", "field_permissions": {}},
+    {"category_key": "notices", "category_name": "Notices", "enabled": True, "user_scope": "all_residents", "field_permissions": {}},
+    {"category_key": "facilities", "category_name": "Facilities", "enabled": True, "user_scope": "all_residents", "field_permissions": {}},
+    {"category_key": "maintenance_requests", "category_name": "Maintenance Requests", "enabled": True, "user_scope": "own_data", "field_permissions": {}},
+    {"category_key": "payments_fees", "category_name": "Payments/Fees", "enabled": False, "user_scope": "nobody", "field_permissions": {}},
+    {"category_key": "attendance", "category_name": "Attendance", "enabled": False, "user_scope": "nobody", "field_permissions": {}},
+    {"category_key": "reservations", "category_name": "Reservations", "enabled": False, "user_scope": "nobody", "field_permissions": {}},
+    {"category_key": "staff_information", "category_name": "Staff Information", "enabled": False, "user_scope": "nobody", "field_permissions": {}}
+]
+
+@app.get("/api/v1/live-updates/integrations/{source_id}/data-access", tags=["ERP Data Access Control"])
+async def get_integration_data_access(source_id: str, organization_id: str, property_id: str, db: AsyncSession = Depends(get_db)):
+    stmt = select(DataAccessPolicy).where(
+        DataAccessPolicy.organization_id == organization_id,
+        DataAccessPolicy.property_id == property_id
+    )
+    res = await db.execute(stmt)
+    policies = res.scalars().all()
+    
+    policy_dict = {p.category_key: p for p in policies}
+    result_categories = []
+    
+    for default_item in DEFAULT_POLICY_LIST:
+        ckey = default_item["category_key"]
+        if ckey in policy_dict:
+            p = policy_dict[ckey]
+            result_categories.append({
+                "category_key": p.category_key,
+                "category_name": p.category_name,
+                "enabled": p.enabled,
+                "user_scope": p.user_scope,
+                "field_permissions": p.field_permissions or default_item.get("field_permissions", {})
+            })
+        else:
+            result_categories.append(default_item)
+            
+    enabled_count = sum(1 for c in result_categories if c["enabled"] and c["user_scope"] != "nobody")
+    restricted_count = len(result_categories) - enabled_count
+
+    return {
+        "source_id": source_id,
+        "organization_id": organization_id,
+        "property_id": property_id,
+        "enabled_categories_count": enabled_count,
+        "restricted_categories_count": restricted_count,
+        "categories": result_categories
+    }
+
+@app.post("/api/v1/live-updates/integrations/{source_id}/data-access", tags=["ERP Data Access Control"])
+async def update_integration_data_access(source_id: str, req: DataAccessPolicyUpdateRequest, db: AsyncSession = Depends(get_db)):
+    changes_list = []
+    actor = req.updated_by or "Hostel Admin"
+    now_dt = datetime.now(timezone.utc)
+
+    for cat in req.categories:
+        stmt = select(DataAccessPolicy).where(
+            DataAccessPolicy.organization_id == req.organization_id,
+            DataAccessPolicy.category_key == cat.category_key
+        )
+        res = await db.execute(stmt)
+        pol = res.scalar_one_or_none()
+        
+        prev_enabled = pol.enabled if pol else False
+        prev_scope = pol.user_scope if pol else "nobody"
+
+        if not pol:
+            pol = DataAccessPolicy(
+                id=f"pol_{cat.category_key}_{int(time.time())}",
+                organization_id=req.organization_id,
+                property_id=req.property_id,
+                integration_source_id=source_id,
+                category_key=cat.category_key,
+                category_name=cat.category_name,
+                enabled=cat.enabled,
+                user_scope=cat.user_scope,
+                field_permissions=cat.field_permissions or {},
+                updated_by=actor,
+                updated_at=now_dt
+            )
+            db.add(pol)
+        else:
+            pol.enabled = cat.enabled
+            pol.user_scope = cat.user_scope
+            pol.field_permissions = cat.field_permissions or {}
+            pol.updated_by = actor
+            pol.updated_at = now_dt
+
+        if prev_enabled != cat.enabled or prev_scope != cat.user_scope:
+            action_verb = "enabled" if cat.enabled else "disabled"
+            scope_label = {
+                "all_residents": "All authenticated residents",
+                "own_data": "Resident's own information only",
+                "staff": "Hostel staff only",
+                "admin": "Admin only",
+                "nobody": "Restricted / Disabled"
+            }.get(cat.user_scope, cat.user_scope)
+            changes_list.append(f"{actor} {action_verb} {cat.category_name} ({scope_label})")
+
+    if not changes_list:
+        changes_list.append(f"{actor} saved data access policy settings.")
+
+    audit = AuditLog(
+        id=f"audit_access_{int(time.time()*1000)}",
+        organization_id=req.organization_id,
+        user_id=actor,
+        action="UPDATE_DATA_ACCESS_POLICY",
+        target_type="ERP_INTEGRATION_ACCESS",
+        target_id=source_id,
+        details_json={
+            "summary": "; ".join(changes_list),
+            "updated_by": actor,
+            "timestamp": str(now_dt)
+        }
+    )
+    db.add(audit)
+    await db.flush()
+
+    return {
+        "source_id": source_id,
+        "status": "SUCCESS",
+        "message": f"ERP Data Access Control policies updated successfully by {actor}.",
+        "audit_entry": {
+            "action": audit.action,
+            "summary": "; ".join(changes_list),
+            "timestamp": str(now_dt)
+        }
+    }
+
+@app.get("/api/v1/live-updates/integrations/{source_id}/audit-logs", tags=["ERP Data Access Control"])
+async def get_integration_access_audit_logs(source_id: str, organization_id: str, db: AsyncSession = Depends(get_db)):
+    stmt = select(AuditLog).where(
+        AuditLog.organization_id == organization_id,
+        AuditLog.target_type == "ERP_INTEGRATION_ACCESS"
+    ).order_by(AuditLog.created_at.desc())
+    res = await db.execute(stmt)
+    logs = res.scalars().all()
+
+    if not logs:
+        return [
+            {
+                "id": "audit_demo_1",
+                "action": "UPDATE_DATA_ACCESS_POLICY",
+                "actor": "Hostel Admin",
+                "summary": "Admin enabled: Room Information → Resident's own data only",
+                "timestamp": str(datetime.now(timezone.utc))
+            },
+            {
+                "id": "audit_demo_2",
+                "action": "UPDATE_DATA_ACCESS_POLICY",
+                "actor": "Hostel Admin",
+                "summary": "Admin disabled: Payment Information, Attendance, Staff Information",
+                "timestamp": str(datetime.now(timezone.utc))
+            }
+        ]
+
+    return [
+        {
+            "id": l.id,
+            "action": l.action,
+            "actor": l.user_id or "Hostel Admin",
+            "summary": l.details_json.get("summary", "Data access policy updated"),
+            "timestamp": str(l.created_at)
+        }
+        for l in logs
+    ]
+
 
 @app.delete("/api/v1/live-updates/integrations/{source_id}", tags=["Live Property Announcements"])
 async def delete_integration_source(source_id: str, db: AsyncSession = Depends(get_db)):

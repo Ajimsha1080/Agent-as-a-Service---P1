@@ -6,8 +6,52 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from services.database.session import AsyncSessionLocal
 from services.database.models import (
-    Property, Room, Facility, LiveUpdate, Reservation, Restaurant, Activity, Conversation
+    Property, Room, Facility, LiveUpdate, Reservation, Restaurant, Activity, Conversation, DataAccessPolicy
 )
+
+TOOL_CATEGORY_MAP = {
+    "get_resident_info": "resident_profile",
+    "getResidentInfo": "resident_profile",
+    "get_room_details": "room_information",
+    "getRoomInfo": "room_information",
+    "get_room_info": "room_information",
+    "get_food_menu": "food_menu",
+    "getFoodMenu": "food_menu",
+    "get_notices": "notices",
+    "getNotices": "notices",
+    "get_current_notices": "notices",
+    "getCurrentNotices": "notices",
+    "get_facility_status": "facilities",
+    "get_maintenance_status": "maintenance_requests",
+    "getMaintenanceStatus": "maintenance_requests",
+    "create_maintenance_request": "maintenance_requests",
+    "createMaintenanceRequest": "maintenance_requests",
+    "get_request_status": "maintenance_requests",
+    "getRequestStatus": "maintenance_requests",
+    "get_payment_info": "payments_fees",
+    "get_attendance_records": "attendance",
+    "get_reservations": "reservations",
+    "get_reservation_status": "reservations",
+    "getReservationStatus": "reservations",
+    "get_staff_info": "staff_information"
+}
+
+DEFAULT_POLICIES = {
+    "resident_profile": {
+        "enabled": False,
+        "user_scope": "nobody",
+        "field_permissions": {"name": True, "room_number": True, "phone_number": False, "email": False, "address": False, "id_information": False}
+    },
+    "room_information": {"enabled": True, "user_scope": "own_data", "field_permissions": {}},
+    "food_menu": {"enabled": True, "user_scope": "all_residents", "field_permissions": {}},
+    "notices": {"enabled": True, "user_scope": "all_residents", "field_permissions": {}},
+    "facilities": {"enabled": True, "user_scope": "all_residents", "field_permissions": {}},
+    "maintenance_requests": {"enabled": True, "user_scope": "own_data", "field_permissions": {}},
+    "payments_fees": {"enabled": False, "user_scope": "nobody", "field_permissions": {}},
+    "attendance": {"enabled": False, "user_scope": "nobody", "field_permissions": {}},
+    "reservations": {"enabled": False, "user_scope": "nobody", "field_permissions": {}},
+    "staff_information": {"enabled": False, "user_scope": "nobody", "field_permissions": {}}
+}
 
 class HospitalityToolRegistry:
     def __init__(self, db_session: Optional[AsyncSession] = None, rag_pipeline=None):
@@ -19,15 +63,43 @@ class HospitalityToolRegistry:
             return self.db_session
         return AsyncSessionLocal()
 
+    async def get_category_policy(self, organization_id: str, property_id: str, category_key: str) -> Dict[str, Any]:
+        """Fetch saved DataAccessPolicy from DB or return safe default."""
+        try:
+            session = await self._get_session()
+            stmt = select(DataAccessPolicy).where(
+                DataAccessPolicy.organization_id == organization_id,
+                DataAccessPolicy.category_key == category_key
+            )
+            res = await session.execute(stmt)
+            pol = res.scalar_one_or_none()
+            if pol:
+                return {
+                    "category_key": pol.category_key,
+                    "category_name": pol.category_name,
+                    "enabled": pol.enabled,
+                    "user_scope": pol.user_scope,
+                    "field_permissions": pol.field_permissions or {}
+                }
+        except Exception as e:
+            print("Policy lookup warning:", str(e))
+            pass
+        return DEFAULT_POLICIES.get(category_key, {"enabled": False, "user_scope": "nobody", "field_permissions": {}})
+
     async def execute_tool(
         self,
         tool_name: str,
         tool_args: Dict[str, Any],
         organization_id: str,
         property_id: str,
-        enabled_tools: List[str]
+        enabled_tools: List[str],
+        user_context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """Authorization wrapper & dispatcher for dynamic hostel & hospitality tools."""
+        """Authorization wrapper & dispatcher for dynamic hostel & hospitality tools with ERP Access Control."""
+        user_context = user_context or {}
+        user_role = user_context.get("user_role", "resident")
+        requesting_user_id = user_context.get("user_id") or user_context.get("resident_id", "res_default_1")
+
         # Convert camelCase tool names to snake_case if needed
         normalized_name = tool_name
         name_map = {
@@ -62,15 +134,67 @@ class HospitalityToolRegistry:
                 "error": f"Tool '{tool_name}' is not enabled for this agent. Authorized tools: {enabled_tools}"
             }
 
+        # --- ERP / LIVE DATA ACCESS CONTROL ENFORCEMENT ---
+        category_key = TOOL_CATEGORY_MAP.get(normalized_name) or TOOL_CATEGORY_MAP.get(tool_name)
+        policy = None
+        if category_key:
+            policy = await self.get_category_policy(organization_id, property_id, category_key)
+            if not policy.get("enabled", False) or policy.get("user_scope") == "nobody":
+                return {
+                    "success": False,
+                    "tool": tool_name,
+                    "error": "I don't have access to that information."
+                }
+
+            user_scope = policy.get("user_scope", "all_residents")
+            target_user_id = tool_args.get("resident_id") or tool_args.get("target_user_id") or tool_args.get("user_id")
+
+            if user_scope == "admin" and user_role != "admin":
+                return {
+                    "success": False,
+                    "tool": tool_name,
+                    "error": "I don't have access to that information. Hostel administrator privileges required."
+                }
+            elif user_scope == "staff" and user_role not in ["staff", "admin"]:
+                return {
+                    "success": False,
+                    "tool": tool_name,
+                    "error": "I don't have access to that information. Hostel staff permission required."
+                }
+            elif user_scope == "own_data" and user_role not in ["staff", "admin"]:
+                if target_user_id and requesting_user_id and target_user_id != requesting_user_id:
+                    return {
+                        "success": False,
+                        "tool": tool_name,
+                        "error": "I don't have access to that information. You may only view your own resident record."
+                    }
+
         handler = getattr(self, f"tool_{normalized_name}", None) or getattr(self, f"tool_{tool_name}", None)
         if not handler:
             return {"success": False, "error": f"Tool implementation '{tool_name}' not found."}
 
         try:
             result = await handler(tool_args, organization_id, property_id)
+            
+            # Apply field-level permissions if applicable
+            if category_key == "resident_profile" and isinstance(result, dict) and policy:
+                field_perms = policy.get("field_permissions", {})
+                if field_perms:
+                    if not field_perms.get("phone_number", False):
+                        result.pop("phone_number", None)
+                        result.pop("emergency_contact", None)
+                    if not field_perms.get("email", False):
+                        result.pop("email", None)
+                        result.pop("customer_email", None)
+                    if not field_perms.get("address", False):
+                        result.pop("address", None)
+                    if not field_perms.get("id_information", False):
+                        result.pop("id_information", None)
+
             return {"success": True, "tool": tool_name, "result": result}
         except Exception as e:
             return {"success": False, "tool": tool_name, "error": str(e)}
+
 
     # --- EXPLICIT HOSTEL AI AGENT TOOL IMPLEMENTATIONS ---
 

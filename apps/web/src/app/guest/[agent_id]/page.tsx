@@ -334,8 +334,14 @@ export default function ResidentHostelAssistantPage() {
               const newLang = e.target.value;
               languageRef.current = newLang;
               setLanguage(newLang);
+              setMessages(prev => {
+                if (prev.length === 1 && prev[0].sender === 'agent') {
+                  return [{ sender: 'agent', text: WELCOME_GREETINGS[newLang] || WELCOME_GREETINGS.English }];
+                }
+                return prev;
+              });
             }}
-            className="bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 text-xs text-zinc-800 focus:outline-none font-semibold"
+            className="bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 text-xs text-zinc-800 focus:outline-none font-semibold cursor-pointer"
           >
             {['English', 'Malayalam', 'Hindi', 'Tamil', 'Kannada', 'Telugu'].map(lang => (
               <option key={lang} value={lang}>{lang}</option>
@@ -395,25 +401,25 @@ export default function ResidentHostelAssistantPage() {
         {/* Quick Action Chips */}
         {mode === 'chat' && (
           <div className="py-3 flex gap-2 overflow-x-auto border-t border-zinc-200">
-            <button onClick={() => handleSendMessage("What's for dinner today?")} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs">
+            <button onClick={() => handleSendMessage(currentChips.dinner)} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs cursor-pointer">
               {currentChips.dinner}
             </button>
-            <button onClick={() => handleSendMessage("What time is dinner today?")} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs">
+            <button onClick={() => handleSendMessage(currentChips.timing)} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs cursor-pointer">
               {currentChips.timing}
             </button>
-            <button onClick={() => handleSendMessage("What are the hostel visitor rules?")} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs">
+            <button onClick={() => handleSendMessage(currentChips.rules)} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs cursor-pointer">
               {currentChips.rules}
             </button>
-            <button onClick={() => handleSendMessage("Where is the hostel laundry?")} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs">
+            <button onClick={() => handleSendMessage(currentChips.laundry)} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs cursor-pointer">
               {currentChips.laundry}
             </button>
-            <button onClick={() => handleSendMessage("The fan in my room isn't working.")} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs">
+            <button onClick={() => handleSendMessage(currentChips.fan)} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs cursor-pointer">
               {currentChips.fan}
             </button>
-            <button onClick={() => handleSendMessage("What is the status of my complaint?")} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs">
+            <button onClick={() => handleSendMessage(currentChips.status)} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs cursor-pointer">
               {currentChips.status}
             </button>
-            <button onClick={() => handleSendMessage("Show today's hostel notices.")} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs">
+            <button onClick={() => handleSendMessage(currentChips.notices)} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs cursor-pointer">
               {currentChips.notices}
             </button>
           </div>

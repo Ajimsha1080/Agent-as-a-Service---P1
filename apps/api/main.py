@@ -22,46 +22,10 @@ from services.billing.metering import UsageMeteringService
 from services.database.session import get_db, AsyncSessionLocal
 from services.database.models import Organization, Property, Agent, AgentConfig, LiveUpdate, Conversation, Document, Room, Facility, UsageEvent, Message, IntegrationSource, AuditLog, DataAccessPolicy
 
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    description="Enterprise Multi-Tenant Agent-as-a-Service (AaaS) Platform for Hospitality",
-    version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc"
-)
+from contextlib import asynccontextmanager
 
-# CORS configuration for Embeddable Web Widget & Admin App
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Shared Services Initialization
-agent_sdk = HospitalityAgentSDK()
-runtime_engine = AgentRuntimeEngine()
-rag_pipeline = RAGPipeline()
-metering_service = UsageMeteringService()
-
-# Global Error Handler
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    request_id = f"req_{int(time.time()*1000)}"
-    return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={
-            "error": {
-                "code": "INTERNAL_SERVER_ERROR",
-                "message": "An unexpected system error occurred. Our operations team has been notified.",
-                "request_id": request_id
-            }
-        }
-    )
-
-@app.on_event("startup")
-async def startup_db_seed():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     """Ensure database tables and real initial seed records exist for Super Admin control plane."""
     from services.database.session import engine, Base
     async with engine.begin() as conn:
@@ -101,6 +65,46 @@ async def startup_db_seed():
             session.add(UsageEvent(id="evt_02", organization_id="org_azure_group", property_id="prop_azure_palm_resort", agent_id="agt_hostel_01", event_type="llm_generation", provider="sarvam", quantity=2100, estimated_cost=0.0042))
 
         await session.commit()
+    yield
+
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    description="Enterprise Multi-Tenant Agent-as-a-Service (AaaS) Platform for Hospitality",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    lifespan=lifespan
+)
+
+# CORS configuration for Embeddable Web Widget & Admin App
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Shared Services Initialization
+agent_sdk = HospitalityAgentSDK()
+runtime_engine = AgentRuntimeEngine()
+rag_pipeline = RAGPipeline()
+metering_service = UsageMeteringService()
+
+# Global Error Handler
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    request_id = f"req_{int(time.time()*1000)}"
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "error": {
+                "code": "INTERNAL_SERVER_ERROR",
+                "message": "An unexpected system error occurred. Our operations team has been notified.",
+                "request_id": request_id
+            }
+        }
+    )
 
 # --- HEALTH & OBSERVABILITY ENDPOINTS ---
 @app.get("/health", tags=["Health"])

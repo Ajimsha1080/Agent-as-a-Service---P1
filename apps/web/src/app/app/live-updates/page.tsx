@@ -122,36 +122,8 @@ export default function AppLiveUpdatesPage() {
     { id: 'aud_2', actor: 'Hostel Admin', summary: 'Admin disabled: Payment Information, Attendance, Staff Information', timestamp: 'Yesterday, 11:30 AM' }
   ]);
 
-  // Real-Time Server-Sent Events (SSE) Stream Listener & Data Synchronization
+  // Real-Time Server-Sent Events (SSE) Stream Listener
   useEffect(() => {
-    async function fetchInitialUpdates() {
-      try {
-        const res = await fetch('http://localhost:8000/api/v1/live-updates?organization_id=org_azure_group&property_id=prop_azure_palm_resort');
-        if (res.ok) {
-          const dbUpdates = await res.json();
-          if (Array.isArray(dbUpdates) && dbUpdates.length > 0) {
-            const dbNotices = dbUpdates.map((u: any) => ({
-              id: u.id,
-              title: u.title,
-              content: u.content,
-              isImportant: u.priority === 'HIGH' || (u.title && u.title.toLowerCase().includes('important')),
-              status: u.status || 'ACTIVE',
-              start: u.created_at || 'Just now',
-              expiry: '7 Days Active'
-            }));
-            setNotices(prev => {
-              const existingIds = new Set(prev.map(n => n.id));
-              const newItems = dbNotices.filter((n: any) => !existingIds.has(n.id));
-              return [...newItems, ...prev];
-            });
-          }
-        }
-      } catch (e) {
-        console.warn('Initial live updates fetch fallback:', e);
-      }
-    }
-    fetchInitialUpdates();
-
     try {
       const eventSource = new EventSource('http://localhost:8000/api/v1/live-updates/events?organization_id=org_azure_group&property_id=prop_azure_palm_resort');
       eventSource.onmessage = (event) => {
@@ -159,7 +131,6 @@ export default function AppLiveUpdatesPage() {
           const data = JSON.parse(event.data);
           if (data.type === 'LIVE_UPDATE_CHANGED') {
             showToast(`⚡ Real-Time Live Update: ${data.title || 'Live Information updated across clients'}`);
-            fetchInitialUpdates();
           }
         } catch (e) {
           console.warn('SSE parse error:', e);
@@ -247,35 +218,18 @@ export default function AppLiveUpdatesPage() {
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  const handleSaveFoodTimings = async () => {
+
+  const handleSaveFoodTimings = () => {
     setFoodTimings(prev => ({
       ...prev,
       dinner: editDinnerTime,
       todayMenu: editMenu
     }));
     setIsEditingFood(false);
-
-    try {
-      await fetch('http://localhost:8000/api/v1/live-updates', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          organization_id: 'org_azure_group',
-          property_id: 'prop_azure_palm_resort',
-          title: `Food timing updated: Dinner set to ${editDinnerTime}`,
-          content: `Today's Menu: ${editMenu}`,
-          type: 'FOOD_TIMINGS',
-          priority: 'NORMAL'
-        })
-      });
-    } catch (e) {
-      console.warn('Food timing sync error:', e);
-    }
-
     showToast('SUCCESS: Live Food Menu & Dinner Timings updated! AI Agent immediately synced.');
   };
 
-  const handleCreateNotice = async (e: React.FormEvent) => {
+  const handleCreateNotice = (e: React.FormEvent) => {
     e.preventDefault();
     if (!noticeTitle.trim() || !noticeContent.trim()) return;
 
@@ -294,45 +248,13 @@ export default function AppLiveUpdatesPage() {
     setNoticeContent('');
     setNoticeImportant(false);
     setIsNoticeModalOpen(false);
-
-    try {
-      await fetch('http://localhost:8000/api/v1/live-updates', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          organization_id: 'org_azure_group',
-          property_id: 'prop_azure_palm_resort',
-          title: noticeTitle,
-          content: noticeContent,
-          type: 'NOTICE',
-          priority: noticeImportant ? 'HIGH' : 'NORMAL'
-        })
-      });
-    } catch (err) {
-      console.warn('Notice persistence warning:', err);
-    }
-
     showToast(`SUCCESS: Notice "${newN.title}" published! AI Agent ready to present.`);
   };
 
-  const toggleFacilityStatus = async (id: string) => {
+  const toggleFacilityStatus = (id: string) => {
     setFacilities(prev => prev.map(f => {
       if (f.id === id) {
         const nextStatus = f.status === 'OPEN' ? 'MAINTENANCE' : f.status === 'MAINTENANCE' ? 'CLOSED' : 'OPEN';
-        
-        fetch('http://localhost:8000/api/v1/live-updates', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            organization_id: 'org_azure_group',
-            property_id: 'prop_azure_palm_resort',
-            title: `Facility Status Updated: ${f.name} is now ${nextStatus}`,
-            content: f.notes,
-            type: 'FACILITY',
-            priority: 'NORMAL'
-          })
-        }).catch(e => console.warn(e));
-
         showToast(`Updated ${f.name} status to ${nextStatus}! Synced with AI Assistant.`);
         return { ...f, status: nextStatus };
       }

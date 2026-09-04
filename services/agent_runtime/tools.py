@@ -53,34 +53,39 @@ DEFAULT_POLICIES = {
     "staff_information": {"enabled": False, "user_scope": "nobody", "field_permissions": {}}
 }
 
+from contextlib import asynccontextmanager
+
 class HospitalityToolRegistry:
     def __init__(self, db_session: Optional[AsyncSession] = None, rag_pipeline=None):
         self.db_session = db_session
         self.rag_pipeline = rag_pipeline
 
-    async def _get_session(self) -> AsyncSession:
+    @asynccontextmanager
+    async def _session_scope(self):
         if self.db_session:
-            return self.db_session
-        return AsyncSessionLocal()
+            yield self.db_session
+        else:
+            async with AsyncSessionLocal() as session:
+                yield session
 
     async def get_category_policy(self, organization_id: str, property_id: str, category_key: str) -> Dict[str, Any]:
         """Fetch saved DataAccessPolicy from DB or return safe default."""
         try:
-            session = await self._get_session()
-            stmt = select(DataAccessPolicy).where(
-                DataAccessPolicy.organization_id == organization_id,
-                DataAccessPolicy.category_key == category_key
-            )
-            res = await session.execute(stmt)
-            pol = res.scalar_one_or_none()
-            if pol:
-                return {
-                    "category_key": pol.category_key,
-                    "category_name": pol.category_name,
-                    "enabled": pol.enabled,
-                    "user_scope": pol.user_scope,
-                    "field_permissions": pol.field_permissions or {}
-                }
+            async with self._session_scope() as session:
+                stmt = select(DataAccessPolicy).where(
+                    DataAccessPolicy.organization_id == organization_id,
+                    DataAccessPolicy.category_key == category_key
+                )
+                res = await session.execute(stmt)
+                pol = res.scalar_one_or_none()
+                if pol:
+                    return {
+                        "category_key": pol.category_key,
+                        "category_name": pol.category_name,
+                        "enabled": pol.enabled,
+                        "user_scope": pol.user_scope,
+                        "field_permissions": pol.field_permissions or {}
+                    }
         except Exception as e:
             print("Policy lookup warning:", str(e))
             pass
@@ -213,15 +218,15 @@ class HospitalityToolRegistry:
 
     async def tool_get_live_hostel_data(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
         data_type = args.get("data_type", "timings")
-        session = await self._get_session()
-        stmt = select(LiveUpdate).where(LiveUpdate.property_id == property_id, LiveUpdate.is_active == True)
-        res = await session.execute(stmt)
-        updates = res.scalars().all()
-        return {
-            "property_id": property_id,
-            "data_type": data_type,
-            "live_updates": [{"title": u.title, "content": u.content, "type": getattr(u, "type", "ANNOUNCEMENT")} for u in updates]
-        }
+        async with self._session_scope() as session:
+            stmt = select(LiveUpdate).where(LiveUpdate.property_id == property_id, LiveUpdate.is_active == True)
+            res = await session.execute(stmt)
+            updates = res.scalars().all()
+            return {
+                "property_id": property_id,
+                "data_type": data_type,
+                "live_updates": [{"title": u.title, "content": u.content, "type": getattr(u, "type", "ANNOUNCEMENT")} for u in updates]
+            }
 
     async def tool_getLiveHostelData(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
         return await self.tool_get_live_hostel_data(args, organization_id, property_id)
@@ -268,62 +273,62 @@ class HospitalityToolRegistry:
         return await self.tool_get_request_status(args, organization_id, property_id)
 
     async def tool_get_notices(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
-        session = await self._get_session()
-        stmt = select(LiveUpdate).where(LiveUpdate.property_id == property_id, LiveUpdate.is_active == True)
-        res = await session.execute(stmt)
-        notices = res.scalars().all()
-        
-        active_notices = [
-            {
-                "title": n.title,
-                "content": n.content,
-                "priority": getattr(n, "priority", "NORMAL"),
-                "status": "ACTIVE",
-                "updated_at": "Updated just now"
-            }
-            for n in notices
-        ]
-        if not active_notices:
+        async with self._session_scope() as session:
+            stmt = select(LiveUpdate).where(LiveUpdate.property_id == property_id, LiveUpdate.is_active == True)
+            res = await session.execute(stmt)
+            notices = res.scalars().all()
+            
             active_notices = [
                 {
-                    "title": "Main Gate Night Entry Timings Update",
-                    "content": "Hostel main gate closes strictly at 10:00 PM starting tonight. Late entries require Warden permission.",
-                    "priority": "HIGH",
+                    "title": n.title,
+                    "content": n.content,
+                    "priority": getattr(n, "priority", "NORMAL"),
                     "status": "ACTIVE",
-                    "updated_at": "Updated today"
-                },
-                {
-                    "title": "Bi-Weekly Elevator Inspection Block A",
-                    "content": "Elevator 2 in Block A routine safety check tomorrow between 02:00 PM and 04:00 PM.",
-                    "priority": "NORMAL",
-                    "status": "ACTIVE",
-                    "updated_at": "Updated yesterday"
+                    "updated_at": "Updated just now"
                 }
+                for n in notices
             ]
-        return {"active_notices": active_notices, "total_active": len(active_notices)}
+            if not active_notices:
+                active_notices = [
+                    {
+                        "title": "Main Gate Night Entry Timings Update",
+                        "content": "Hostel main gate closes strictly at 10:00 PM starting tonight. Late entries require Warden permission.",
+                        "priority": "HIGH",
+                        "status": "ACTIVE",
+                        "updated_at": "Updated today"
+                    },
+                    {
+                        "title": "Bi-Weekly Elevator Inspection Block A",
+                        "content": "Elevator 2 in Block A routine safety check tomorrow between 02:00 PM and 04:00 PM.",
+                        "priority": "NORMAL",
+                        "status": "ACTIVE",
+                        "updated_at": "Updated yesterday"
+                    }
+                ]
+            return {"active_notices": active_notices, "total_active": len(active_notices)}
 
     async def tool_getNotices(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
         return await self.tool_get_notices(args, organization_id, property_id)
 
     async def tool_get_food_menu(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
-        session = await self._get_session()
-        stmt = select(Restaurant).where(Restaurant.property_id == property_id)
-        res = await session.execute(stmt)
-        rests = res.scalars().all()
-        menu_info = {
-            "breakfast": "07:30 AM - 09:30 AM: Idli, Sambar, Chutney, Tea/Coffee, Omelette",
-            "lunch": "12:30 PM - 02:30 PM: Kerala Rice, Sambar, Chicken Curry, Paneer Butter Masala, Curd",
-            "snacks": "05:00 PM - 06:00 PM: Banana Fritters / Samosa, Tea/Coffee",
-            "dinner": "08:00 PM - 09:30 PM: Chapati, Dal Tadka, Veg Kurma, Salad, Milk"
-        }
-        if rests:
-            r = rests[0]
-            menu_info["operating_hours"] = r.operating_hours
-        return {
-            "day": args.get("day", "Today"),
-            "meal_type": args.get("meal_type", "All Meals"),
-            "menu": menu_info
-        }
+        async with self._session_scope() as session:
+            stmt = select(Restaurant).where(Restaurant.property_id == property_id)
+            res = await session.execute(stmt)
+            rests = res.scalars().all()
+            menu_info = {
+                "breakfast": "07:30 AM - 09:30 AM: Idli, Sambar, Chutney, Tea/Coffee, Omelette",
+                "lunch": "12:30 PM - 02:30 PM: Kerala Rice, Sambar, Chicken Curry, Paneer Butter Masala, Curd",
+                "snacks": "05:00 PM - 06:00 PM: Banana Fritters / Samosa, Tea/Coffee",
+                "dinner": "08:00 PM - 09:30 PM: Chapati, Dal Tadka, Veg Kurma, Salad, Milk"
+            }
+            if rests:
+                r = rests[0]
+                menu_info["operating_hours"] = r.operating_hours
+            return {
+                "day": args.get("day", "Today"),
+                "meal_type": args.get("meal_type", "All Meals"),
+                "menu": menu_info
+            }
 
     async def tool_getFoodMenu(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
         return await self.tool_get_food_menu(args, organization_id, property_id)
@@ -352,110 +357,110 @@ class HospitalityToolRegistry:
         return f"Property knowledge for '{query}': Direct guest inquiries handled via active RAG index."
 
     async def tool_get_property_details(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
-        session = await self._get_session()
-        stmt = select(Property).where(Property.id == property_id)
-        res = await session.execute(stmt)
-        prop = res.scalar_one_or_none()
-        if prop:
+        async with self._session_scope() as session:
+            stmt = select(Property).where(Property.id == property_id)
+            res = await session.execute(stmt)
+            prop = res.scalar_one_or_none()
+            if prop:
+                return {
+                    "property_id": prop.id,
+                    "property_name": prop.name,
+                    "type": prop.property_type,
+                    "timezone": prop.timezone,
+                    "currency": prop.currency,
+                    "address": prop.address or "Coastal Beach Road",
+                    "contact_email": prop.contact_email or "concierge@property.com"
+                }
             return {
-                "property_id": prop.id,
-                "property_name": prop.name,
-                "type": prop.property_type,
-                "timezone": prop.timezone,
-                "currency": prop.currency,
-                "address": prop.address or "Coastal Beach Road",
-                "contact_email": prop.contact_email or "concierge@property.com"
+                "property_id": property_id,
+                "status": "PROPERTY_NOT_FOUND"
             }
-        return {
-            "property_id": property_id,
-            "status": "PROPERTY_NOT_FOUND"
-        }
 
     async def tool_get_room_details(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
         room_type = args.get("room_type", "")
-        session = await self._get_session()
-        stmt = select(Room).where(Room.property_id == property_id)
-        if room_type:
-            stmt = stmt.where(Room.room_type.ilike(f"%{room_type}%"))
-        res = await session.execute(stmt)
-        rooms = res.scalars().all()
-        if rooms:
-            r = rooms[0]
-            return {
-                "room_id": r.id,
-                "room_number": r.room_number,
-                "room_type": r.room_type,
-                "price_per_night": r.price_per_night,
-                "max_occupancy": r.max_occupancy,
-                "description": r.description
-            }
-        return {"status": "ROOM_TYPE_NOT_FOUND", "query": room_type}
+        async with self._session_scope() as session:
+            stmt = select(Room).where(Room.property_id == property_id)
+            if room_type:
+                stmt = stmt.where(Room.room_type.ilike(f"%{room_type}%"))
+            res = await session.execute(stmt)
+            rooms = res.scalars().all()
+            if rooms:
+                r = rooms[0]
+                return {
+                    "room_id": r.id,
+                    "room_number": r.room_number,
+                    "room_type": r.room_type,
+                    "price_per_night": r.price_per_night,
+                    "max_occupancy": r.max_occupancy,
+                    "description": r.description
+                }
+            return {"status": "ROOM_TYPE_NOT_FOUND", "query": room_type}
 
     async def tool_check_room_availability(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
         check_in = args.get("check_in", "Today")
         check_out = args.get("check_out", "Tomorrow")
-        session = await self._get_session()
-        stmt = select(Room).where(Room.property_id == property_id, Room.is_available == True)
-        res = await session.execute(stmt)
-        rooms = res.scalars().all()
-        available_list = [
-            {
-                "room_number": r.room_number,
-                "room_type": r.room_type,
-                "rate_per_night": r.price_per_night,
-                "max_occupancy": r.max_occupancy
+        async with self._session_scope() as session:
+            stmt = select(Room).where(Room.property_id == property_id, Room.is_available == True)
+            res = await session.execute(stmt)
+            rooms = res.scalars().all()
+            available_list = [
+                {
+                    "room_number": r.room_number,
+                    "room_type": r.room_type,
+                    "rate_per_night": r.price_per_night,
+                    "max_occupancy": r.max_occupancy
+                }
+                for r in rooms
+            ]
+            return {
+                "check_in": check_in,
+                "check_out": check_out,
+                "available_rooms": available_list,
+                "total_available": len(available_list),
+                "status": "AVAILABLE" if available_list else "NO_VACANCY"
             }
-            for r in rooms
-        ]
-        return {
-            "check_in": check_in,
-            "check_out": check_out,
-            "available_rooms": available_list,
-            "total_available": len(available_list),
-            "status": "AVAILABLE" if available_list else "NO_VACANCY"
-        }
 
     async def tool_get_current_room_price(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
         room_type = args.get("room_type", "")
-        session = await self._get_session()
-        stmt = select(Room).where(Room.property_id == property_id)
-        if room_type:
-            stmt = stmt.where(Room.room_type.ilike(f"%{room_type}%"))
-        res = await session.execute(stmt)
-        rooms = res.scalars().all()
-        if rooms:
-            r = rooms[0]
-            return {
-                "room_type": r.room_type,
-                "price_per_night": r.price_per_night,
-                "currency": "USD"
-            }
-        return {"status": "NOT_FOUND"}
+        async with self._session_scope() as session:
+            stmt = select(Room).where(Room.property_id == property_id)
+            if room_type:
+                stmt = stmt.where(Room.room_type.ilike(f"%{room_type}%"))
+            res = await session.execute(stmt)
+            rooms = res.scalars().all()
+            if rooms:
+                r = rooms[0]
+                return {
+                    "room_type": r.room_type,
+                    "price_per_night": r.price_per_night,
+                    "currency": "USD"
+                }
+            return {"status": "NOT_FOUND"}
 
     async def tool_create_booking(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
-        session = await self._get_session()
-        booking_id = f"RES-{uuid.uuid4().hex[:6].upper()}"
-        res = Reservation(
-            id=booking_id,
-            property_id=property_id,
-            customer_name=args.get("customer_name", "Valued Guest"),
-            customer_email=args.get("customer_email", "guest@example.com"),
-            check_in=args.get("check_in", "2026-09-01"),
-            check_out=args.get("check_out", "2026-09-04"),
-            total_amount=560.0,
-            status="CONFIRMED"
-        )
-        session.add(res)
-        await session.flush()
-        return {
-            "booking_id": booking_id,
-            "customer_name": res.customer_name,
-            "customer_email": res.customer_email,
-            "room_type": args.get("room_type", "Standard Suite"),
-            "check_in": res.check_in,
-            "check_out": res.check_out,
-            "status": "CONFIRMED"
-        }
+        async with self._session_scope() as session:
+            booking_id = f"RES-{uuid.uuid4().hex[:6].upper()}"
+            res = Reservation(
+                id=booking_id,
+                property_id=property_id,
+                customer_name=args.get("customer_name", "Valued Guest"),
+                customer_email=args.get("customer_email", "guest@example.com"),
+                check_in=args.get("check_in", "2026-09-01"),
+                check_out=args.get("check_out", "2026-09-04"),
+                total_amount=560.0,
+                status="CONFIRMED"
+            )
+            session.add(res)
+            await session.flush()
+            return {
+                "booking_id": booking_id,
+                "customer_name": res.customer_name,
+                "customer_email": res.customer_email,
+                "room_type": args.get("room_type", "Standard Suite"),
+                "check_in": res.check_in,
+                "check_out": res.check_out,
+                "status": "CONFIRMED"
+            }
 
     async def tool_modify_booking(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
         booking_id = args.get("booking_id")
@@ -475,59 +480,59 @@ class HospitalityToolRegistry:
 
     async def tool_get_facility_status(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
         facility_name = args.get("facility_name", "")
-        session = await self._get_session()
-        stmt = select(Facility).where(Facility.property_id == property_id)
-        if facility_name:
-            stmt = stmt.where(Facility.name.ilike(f"%{facility_name}%"))
-        res = await session.execute(stmt)
-        facilities = res.scalars().all()
-        if facilities:
-            f = facilities[0]
-            return {
-                "facility_name": f.name,
-                "status": f.status,
-                "operating_hours": f"{f.opening_time} - {f.closing_time}",
-                "current_notes": f.description or ""
-            }
-        # Fallback to all facilities for property
-        all_stmt = select(Facility).where(Facility.property_id == property_id)
-        all_res = await session.execute(all_stmt)
-        all_facs = all_res.scalars().all()
-        if all_facs:
-            f = all_facs[0]
-            return {
-                "facility_name": f.name,
-                "status": f.status,
-                "operating_hours": f"{f.opening_time} - {f.closing_time}",
-                "current_notes": f.description or ""
-            }
-        return {"facility_name": facility_name or "Facility", "status": "UNKNOWN", "operating_hours": "N/A"}
+        async with self._session_scope() as session:
+            stmt = select(Facility).where(Facility.property_id == property_id)
+            if facility_name:
+                stmt = stmt.where(Facility.name.ilike(f"%{facility_name}%"))
+            res = await session.execute(stmt)
+            facilities = res.scalars().all()
+            if facilities:
+                f = facilities[0]
+                return {
+                    "facility_name": f.name,
+                    "status": f.status,
+                    "operating_hours": f"{f.opening_time} - {f.closing_time}",
+                    "current_notes": f.description or ""
+                }
+            # Fallback to all facilities for property
+            all_stmt = select(Facility).where(Facility.property_id == property_id)
+            all_res = await session.execute(all_stmt)
+            all_facs = all_res.scalars().all()
+            if all_facs:
+                f = all_facs[0]
+                return {
+                    "facility_name": f.name,
+                    "status": f.status,
+                    "operating_hours": f"{f.opening_time} - {f.closing_time}",
+                    "current_notes": f.description or ""
+                }
+            return {"facility_name": facility_name or "Facility", "status": "UNKNOWN", "operating_hours": "N/A"}
 
     async def tool_get_today_activities(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
-        session = await self._get_session()
-        stmt = select(Activity).where(Activity.property_id == property_id)
-        res = await session.execute(stmt)
-        acts = res.scalars().all()
-        act_list = [
-            {"title": a.name, "location": a.location, "price": f"${a.price}"}
-            for a in acts
-        ]
-        return {
-            "date": datetime.now().strftime("%Y-%m-%d"),
-            "activities": act_list
-        }
+        async with self._session_scope() as session:
+            stmt = select(Activity).where(Activity.property_id == property_id)
+            res = await session.execute(stmt)
+            acts = res.scalars().all()
+            act_list = [
+                {"title": a.name, "location": a.location, "price": f"${a.price}"}
+                for a in acts
+            ]
+            return {
+                "date": datetime.now().strftime("%Y-%m-%d"),
+                "activities": act_list
+            }
 
     async def tool_get_restaurant_status(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
-        session = await self._get_session()
-        stmt = select(Restaurant).where(Restaurant.property_id == property_id)
-        res = await session.execute(stmt)
-        rests = res.scalars().all()
-        return {
-            "restaurants": [
-                {"name": r.name, "cuisine": r.cuisine_type, "hours": f"{r.opening_time} - {r.closing_time}"}
-                for r in rests
-            ]
-        }
+        async with self._session_scope() as session:
+            stmt = select(Restaurant).where(Restaurant.property_id == property_id)
+            res = await session.execute(stmt)
+            rests = res.scalars().all()
+            return {
+                "restaurants": [
+                    {"name": r.name, "cuisine": r.cuisine_type, "hours": f"{r.opening_time} - {r.closing_time}"}
+                    for r in rests
+                ]
+            }
 
     async def tool_get_restaurant_menu(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
         return {
@@ -536,21 +541,21 @@ class HospitalityToolRegistry:
         }
 
     async def tool_get_current_property_updates(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
-        session = await self._get_session()
-        stmt = select(LiveUpdate).where(LiveUpdate.property_id == property_id, LiveUpdate.is_active == True)
-        res = await session.execute(stmt)
-        upds = res.scalars().all()
-        updates_list = [
-            {
-                "title": u.title,
-                "content": u.content,
-                "type": getattr(u, "type", "ANNOUNCEMENT"),
-                "priority": getattr(u, "priority", "NORMAL"),
-                "timestamp": str(u.created_at)
-            }
-            for u in upds
-        ]
-        return {"live_updates": updates_list}
+        async with self._session_scope() as session:
+            stmt = select(LiveUpdate).where(LiveUpdate.property_id == property_id, LiveUpdate.is_active == True)
+            res = await session.execute(stmt)
+            upds = res.scalars().all()
+            updates_list = [
+                {
+                    "title": u.title,
+                    "content": u.content,
+                    "type": getattr(u, "type", "ANNOUNCEMENT"),
+                    "priority": getattr(u, "priority", "NORMAL"),
+                    "timestamp": str(u.created_at)
+                }
+                for u in upds
+            ]
+            return {"live_updates": updates_list}
 
     async def tool_get_weather(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
         return {

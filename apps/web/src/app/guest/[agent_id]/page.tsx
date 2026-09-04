@@ -22,6 +22,15 @@ const FALLBACK_RESPONSES: Record<string, string> = {
   Kannada: 'ಕೇಳಿದ್ದಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು! ಹಾಸ್ಟೆಲ್ ಗೇಟ್ ಮತ್ತು ಡೈನಿಂಗ್ ಇಂದು ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಿದೆ.'
 };
 
+const THINKING_TEXTS: Record<string, string> = {
+  English: 'Hostel AI is thinking...',
+  Malayalam: 'ഹോസ്റ്റൽ AI ചിന്തിക്കുന്നു...',
+  Hindi: 'हॉस्टल AI सोच रहा है...',
+  Tamil: 'ஹாஸ்டல் AI யோசிக்கிறது...',
+  Telugu: 'హాస్టల్ AI ఆలోచిస్తోంది...',
+  Kannada: 'ಹಾಸ್ಟೆಲ್ AI ಯೋಚಿಸುತ್ತಿದೆ...'
+};
+
 const ACTION_CHIPS: Record<string, { dinner: string; timing: string; rules: string; laundry: string; fan: string; status: string; notices: string }> = {
   English: {
     dinner: "🍽️ What's for dinner today?",
@@ -395,6 +404,25 @@ export default function ResidentHostelAssistantPage() {
                 </div>
               </div>
             ))}
+
+            {/* AI Thinking Animation */}
+            {isLoading && (
+              <div className="flex justify-start items-center gap-2">
+                <div className="max-w-[80%] rounded-2xl px-5 py-3 text-sm bg-white border border-zinc-200 text-zinc-800 rounded-bl-none flex items-center gap-3 shadow-xs">
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-emerald-600 animate-spin" />
+                    <span className="text-xs font-semibold text-zinc-600">
+                      {THINKING_TEXTS[language] || THINKING_TEXTS.English}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.3s]"></span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.15s]"></span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce"></span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

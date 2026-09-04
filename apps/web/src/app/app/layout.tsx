@@ -12,14 +12,13 @@ export default function OrganizationAppLayout({ children }: { children: React.Re
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const navItems = [
-    { name: 'Overview', href: '/app/dashboard', icon: Home },
-    { name: 'Properties', href: '/app/properties', icon: Building2 },
-    { name: 'AI Agents', href: '/app/agents', icon: Bot },
-    { name: 'Staff Intercom', href: '/app/conversations', icon: MessageSquare },
-    { name: 'Knowledge Base', href: '/app/knowledge', icon: BookOpen },
-    { name: 'Live Alerts', href: '/app/live-updates', icon: Radio },
-    { name: 'Analytics', href: '/app/analytics', icon: BarChart3 },
-    { name: 'Billing & Limits', href: '/app/billing', icon: CreditCard },
+    { name: 'Dashboard', href: '/app/dashboard', icon: Home },
+    { name: 'AI Assistant', href: '/app/agents', icon: Bot },
+    { name: 'Knowledge', href: '/app/knowledge', icon: BookOpen },
+    { name: 'Live Information', href: '/app/live-updates', icon: Radio },
+    { name: 'Requests', href: '/app/requests', icon: MessageSquare },
+    { name: 'Residents', href: '/app/residents', icon: Users },
+    { name: 'Settings', href: '/app/settings', icon: Sparkles },
   ];
 
   return (
@@ -44,8 +43,8 @@ export default function OrganizationAppLayout({ children }: { children: React.Re
             </div>
             {!isCollapsed && (
               <div className="overflow-hidden">
-                <h2 className="font-bold text-xs text-zinc-900 truncate">Azure Group</h2>
-                <span className="text-[10px] text-zinc-500 font-medium truncate block">Azure Palm Resort</span>
+                <h2 className="font-bold text-xs text-zinc-900 truncate">Azure Hostel Group</h2>
+                <span className="text-[10px] text-zinc-500 font-medium truncate block">Azure Palm Hostel</span>
               </div>
             )}
           </div>

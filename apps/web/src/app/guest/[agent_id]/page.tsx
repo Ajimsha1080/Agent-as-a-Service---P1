@@ -5,20 +5,88 @@ import { Send, Sparkles, Utensils, Calendar, ShieldCheck } from 'lucide-react';
 import { VoiceOrb } from '../../../components/ui/voice-orb';
 
 const WELCOME_GREETINGS: Record<string, string> = {
-  English: 'Welcome to Azure Palm Resort & Spa! I am your 24/7 digital concierge. How can I assist your stay today?',
-  Malayalam: 'അസൂർ പാം റിസോർട്ട് & സ്പാ-യിലേക്ക് സ്വാഗതം! ഞാൻ നിങ്ങളുടെ ഡിജിറ്റൽ കോൺസിയർജ് ആണ്. ഇന്ന് എനിക്ക് നിങ്ങളെ എങ്ങനെ സഹായിക്കാനാകും?',
-  Hindi: 'अज़ूर पाम रिज़ॉर्ट और स्पा में आपका स्वागत है! मैं आपका 24/7 डिजिटल कंसीयज हूँ। आज मैं आपकी कैसे सहायता कर सकता हूँ?',
-  Tamil: 'அஸூர் பாம் ரிசார்ட் & ஸ்பாவுக்கு நல்வரவு! நான் உங்கள் 24/7 டிஜிட்டல் கான்சியர்ஜ். இன்று நான் உங்களுக்கு எவ்வாறு உதவ முடியும்?',
-  Telugu: 'అజూర్ పామ్ రిసార్ట్ & స్పాకి സ്വാగతం! నేను మీ 24/7 డిజిటల్ కాన్సియర్జ్. ఈరోజు నేను మీకు ఎలా సహాయపడగలను?',
-  Kannada: 'ಅಜೂರ್ ಪಾಮ್ ರೆಸಾರ್ಟ್ ಮತ್ತು ಸ್ಪಾಗೆ ಸುಸ್ವಾಗತ! ನಾನು ನಿಮ್ಮ 24/7 ಡಿಜಿಟಲ್ ಕಾನ್ಸಿಯರ್ಜ್. ಇಂದು ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?'
+  English: 'Welcome to Azure Hostel! I am your Hostel AI Assistant. Ask me anything about your hostel, mess menu, timings, rules, or room maintenance.',
+  Malayalam: 'അസൂർ ഹോസ്റ്റലിലേക്ക് സ്വാഗതം! ഞാൻ നിങ്ങളുടെ ഹോസ്റ്റൽ AI അസിസ്റ്റന്റ് ആണ്. മെസ് മെനു, സമയങ്ങൾ, നിയമങ്ങൾ അല്ലെങ്കിൽ മുറി അറ്റകുറ്റപ്പണികളെക്കുറിച്ച് എന്നോട് ചോദിക്കുക.',
+  Hindi: 'अज़ूर हॉस्टल में आपका स्वागत है! मैं आपका हॉस्टल AI सहायक हूँ। मैस मेन्यू, समय, नियम या कमरे के रख-रखाव के बारे में मुझसे कुछ भी पूछें।',
+  Tamil: 'அஸூர் ஹாஸ்டலுக்கு நல்வரவு! நான் உங்கள் ஹாஸ்டல் AI உதவியாளர். மெஸ் மெனு, நேரங்கள், விதிகள் அல்லது அறை பராமரிப்பு பற்றி எதையும் கேட்கவும்.',
+  Telugu: 'అజూర్ హాస్టల్‌కి స్వాగతం! నేను మీ హాస్టల్ AI సహాయకుడిని. మెస్ మెనూ, సమయాలు, నిబంధనలు లేదా గది నిర్వహణ గురించి నన్ను ఏదైనా అడగండి.',
+  Kannada: 'ಅಜೂರ್ ಹಾಸ್ಟೆಲ್‌ಗೆ ಸುಸ್ವಾಗತ! ನಾನು ನಿಮ್ಮ ಹಾಸ್ಟೆಲ್ AI ಸಹಾಯಕ. ಮೆಸ್ ಮೆನು, ಸಮಯ, ನಿಯಮಗಳು ಅಥವಾ ಕೊಠಡಿ ನಿರ್ವಹಣೆ ಬಗ್ಗೆ ಕೇಳಿ.'
 };
 
 const FALLBACK_RESPONSES: Record<string, string> = {
-  English: 'Thank you for reaching out! All resort facilities and infinity pool amenities are fully operational today.',
-  Malayalam: 'ഞങ്ങളുമായി ബന്ധപ്പെട്ടതിന് നന്ദി! എല്ലാ റിസോർട്ട് സൗകര്യങ്ങളും ഇൻഫിനിറ്റി പൂളും ഇന്ന് പ്രവർത്തിക്കുന്നു.',
-  Hindi: 'हमसे संपर्क करने के लिए धन्यवाद! रिज़ॉर्ट की सभी सुविधाएँ और स्विमिंग पूल आज पूरी तरह से चालू हैं।',
-  Tamil: 'எங்களை தொடர்புகொண்டதற்கு நன்றி! அனைத்து ரிசார்ட் வசதிகளும் இன்று இயங்குகின்றன.',
-  Telugu: 'మమ్మల్ని సంప్రదించినందుకు ధన్యవాదాలు! రిసార్ట్ సౌకర్యాలన్నీ ఈరోజు అందుబాటులో ఉన్నాయి.',
+  English: 'Thank you for asking! Hostel gate and dining operations are fully running today. Dinner is served at 08:00 PM.',
+  Malayalam: 'ചോദിച്ചതിന് നന്ദി! ഹോസ്റ്റൽ ഗേറ്റും മെസ് ഡൈനിംഗും ഇന്ന് തടസ്സമില്ലാതെ പ്രവർത്തിക്കുന്നു. അത്താഴം രാത്രി 08:00 ന് നൽകും.',
+  Hindi: 'पूछने के लिए धन्यवाद! हॉस्टल गेट और मैस डायनिंग आज सामान्य रूप से चालू हैं। रात का खाना रात 08:00 बजे परोसा जाएगा।',
+  Tamil: 'கேட்டதற்கு நன்றி! ஹாஸ்டல் கேட் மற்றும் மெஸ் இயங்குகின்றன. இரவு உணவு 08:00 மணிக்கு வழங்கப்படும்.',
+  Telugu: 'అడిగినందుకు ధన్యవాదాలు! హాస్టల్ గేట్ మరియు డైనింగ్ ఈరోజు అందుబాటులో ఉన్నాయి.',
+  Kannada: 'ಕೇಳಿದ್ದಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು! ಹಾಸ್ಟೆಲ್ ಗೇಟ್ ಮತ್ತು ಡೈನಿಂಗ್ ಇಂದು ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಿದೆ.'
+};
+
+const ACTION_CHIPS: Record<string, { dinner: string; timing: string; rules: string; laundry: string; fan: string; status: string; notices: string }> = {
+  English: {
+    dinner: "🍽️ What's for dinner today?",
+    timing: '⏰ What time is dinner?',
+    rules: '📜 Visitor Rules',
+    laundry: '🧺 Where is the laundry?',
+    fan: "🔧 My fan isn't working.",
+    status: '🔍 Complaint Status',
+    notices: "📢 Today's Notices"
+  },
+  Malayalam: {
+    dinner: '🍽️ ഇന്നത്തെ അത്താഴം എന്താണ്?',
+    timing: '⏰ അത്താഴ സമയം എപ്പോഴാണ്?',
+    rules: '📜 സന്ദർശക നിയമങ്ങൾ',
+    laundry: '🧺 ലോൺട്രി എവിടെയാണ്?',
+    fan: '🔧 ഫാൻ പ്രവർത്തിക്കുന്നില്ല',
+    status: '🔍 പരാതിയുടെ അവസ്ഥ',
+    notices: '📢 ഇന്നത്തെ നോട്ടീസുകൾ'
+  },
+  Hindi: {
+    dinner: '🍽️ आज रात के खाने में क्या है?',
+    timing: '⏰ डिनर का समय क्या है?',
+    rules: '📜 विजिटर नियम',
+    laundry: '🧺 लॉन्ड्री कहाँ है?',
+    fan: '🔧 पंखा काम नहीं कर रहा',
+    status: '🔍 शिकायत की स्थिति',
+    notices: '📢 आज के नोटिस'
+  },
+  Tamil: {
+    dinner: '🍽️ இன்று இரவு உணவு என்ன?',
+    timing: '⏰ இரவு உணவு நேரம் என்ன?',
+    rules: '📜 பார்வையாளர் விதிகள்',
+    laundry: '🧺 துணி துவைக்கும் இடம்',
+    fan: '🔧 பேன் வேலை செய்யவில்லை',
+    status: '🔍 புகாரின் நிலை',
+    notices: '📢 இன்றைய அறிவிப்புகள்'
+  },
+  Telugu: {
+    dinner: '🍽️ ఈరోజు డిన్నర్ ఏమిటి?',
+    timing: '⏰ డిన్నర్ సమయం ఎంత?',
+    rules: '📜 విజిటర్ నిబంధనలు',
+    laundry: '🧺 లాండ్రీ ఎక్కడ ఉంది?',
+    fan: '🔧 ఫ్యాన్ పనిచేయడం లేదు',
+    status: '🔍 ఫిర్యాదు స్థితి',
+    notices: '📢 నేటి నోటీసులు'
+  },
+  Kannada: {
+    dinner: '🍽️ ಇಂದಿನ ಊಟ ಏನು?',
+    timing: '⏰ ಊಟದ ಸಮಯ ಎಷ್ಟು?',
+    rules: '📜 ಭೇಟಿಯ ನಿಯಮಗಳು',
+    laundry: '🧺 ಲಾಂಡ್ರಿ ಎಲ್ಲಿದೆ?',
+    fan: '🔧 ಫ್ಯಾನ್ ಕೆಲಸ ಮಾಡುತ್ತಿಲ್ಲ',
+    status: '🔍 ದೂರಿನ ಸ್ಥಿತಿ',
+    notices: '📢 ಇಂದಿನ ನೋಟಿಸ್‌ಗಳು'
+  }
+};
+
+const PLACEHOLDERS: Record<string, string> = {
+  English: 'Ask me anything about your hostel (mess menu, timings, rules, maintenance)...',
+  Malayalam: 'ഹോസ്റ്റലിനെക്കുറിച്ച് എന്തും ചോദിക്കുക (മെനു, സമയങ്ങൾ, നിയമങ്ങൾ)...',
+  Hindi: 'अपने हॉस्टल के बारे में कुछ भी पूछें (मेन्यू, समय, नियम, मेंटेनेंस)...',
+  Tamil: 'உங்கள் ஹாஸ்டல் பற்றி எதையும் கேட்கவும் (மெனு, நேரங்கள், விதிகள்)...',
+  Telugu: 'మీ హాస్టల్ గురించి ఏదైనా అడగండి (మెనూ, సమయాలు, నిబంధనలు)...',
+  Kannada: 'ನಿಮ್ಮ ಹಾಸ್ಟೆಲ್ ಬಗ್ಗೆ ಕೇಳಿ (ಮೆನು, ಸಮಯ, ನಿಯಮಗಳು)...'
+};లో ఉన్నాయి.',
   Kannada: 'ನಮ್ಮನ್ನು ಸಂಪರ್ಕಿಸಿದ್ದಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು! ರೆಸಾರ್ಟ್‌ನ ಎಲ್ಲಾ ಸೌಲಭ್ಯಗಳು ಇಂದು ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಿವೆ.'
 };
 
@@ -383,17 +451,26 @@ export default function GuestConciergePage() {
         {/* Quick Action Chips */}
         {mode === 'chat' && (
           <div className="py-3 flex gap-2 overflow-x-auto border-t border-zinc-200">
-            <button onClick={() => handleSendMessage("Is the swimming pool open now?")} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs">
-              {currentChips.pool}
+            <button onClick={() => handleSendMessage("What's for dinner today?")} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs">
+              {currentChips.dinner}
             </button>
-            <button onClick={() => handleSendMessage("What are today's room rates and availability?")} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs">
-              {currentChips.rooms}
+            <button onClick={() => handleSendMessage("What time is dinner today?")} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs">
+              {currentChips.timing}
             </button>
-            <button onClick={() => handleSendMessage("Show today's guest activities schedule")} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs">
-              {currentChips.activities}
+            <button onClick={() => handleSendMessage("What are the hostel visitor rules?")} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs">
+              {currentChips.rules}
             </button>
-            <button onClick={() => handleSendMessage("Show restaurant hours and menu")} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs">
-              {currentChips.dining}
+            <button onClick={() => handleSendMessage("Where is the hostel laundry?")} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs">
+              {currentChips.laundry}
+            </button>
+            <button onClick={() => handleSendMessage("The fan in my room isn't working.")} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs">
+              {currentChips.fan}
+            </button>
+            <button onClick={() => handleSendMessage("What is the status of my complaint?")} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs">
+              {currentChips.status}
+            </button>
+            <button onClick={() => handleSendMessage("Show today's hostel notices.")} className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 whitespace-nowrap shadow-xs">
+              {currentChips.notices}
             </button>
           </div>
         )}

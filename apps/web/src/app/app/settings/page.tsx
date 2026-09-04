@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
-import { Settings, Save, Shield, Phone, Sparkles, Building2, UserCheck, Key } from 'lucide-react';
+import Link from 'next/link';
+import { Settings, Save, Shield, Phone, Sparkles, Building2, UserCheck, Key, Users, MessageSquare, ChevronRight } from 'lucide-react';
 
 export default function AppSettingsPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -122,6 +123,50 @@ export default function AppSettingsPage() {
               <span className="font-bold text-zinc-900 block">Staff Role: Maintenance Staff</span>
               <span className="text-[11px] text-zinc-500">Access restricted to Requests & Ticket resolution.</span>
             </div>
+          </div>
+        </div>
+
+        {/* 4. Advanced Administrative Records & Secondary Workflows */}
+        <div className="yc-card p-6 space-y-4">
+          <h2 className="text-sm font-bold text-zinc-900 flex items-center gap-2 border-b border-zinc-200 pb-3">
+            <Key className="w-4 h-4 text-zinc-700" /> 4. Advanced Administrative Records & Secondary Workflows
+          </h2>
+          <p className="text-xs text-zinc-500">
+            Resident records and maintenance requests are managed automatically by the Hostel AI Agent. You can inspect advanced records below when manual administrative review is needed.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Link
+              href="/app/residents"
+              className="p-4 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 rounded-xl transition-all flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-zinc-900 text-white flex items-center justify-center">
+                  <Users className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-zinc-900 group-hover:text-black">Resident Roster</h3>
+                  <span className="text-[11px] text-zinc-500">148 registered residents & room allocations</span>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900" />
+            </Link>
+
+            <Link
+              href="/app/requests"
+              className="p-4 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 rounded-xl transition-all flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-zinc-900 text-white flex items-center justify-center">
+                  <MessageSquare className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-zinc-900 group-hover:text-black">Hostel Maintenance Requests</h3>
+                  <span className="text-[11px] text-zinc-500">View & resolve reported maintenance tickets</span>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900" />
+            </Link>
           </div>
         </div>
 

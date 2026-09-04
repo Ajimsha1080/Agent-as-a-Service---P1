@@ -16,8 +16,6 @@ export default function OrganizationAppLayout({ children }: { children: React.Re
     { name: 'AI Assistant', href: '/app/agents', icon: Bot },
     { name: 'Knowledge', href: '/app/knowledge', icon: BookOpen },
     { name: 'Live Information', href: '/app/live-updates', icon: Radio },
-    { name: 'Requests', href: '/app/requests', icon: MessageSquare },
-    { name: 'Residents', href: '/app/residents', icon: Users },
     { name: 'Settings', href: '/app/settings', icon: Sparkles },
   ];
 

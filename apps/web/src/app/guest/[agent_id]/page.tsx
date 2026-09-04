@@ -103,6 +103,27 @@ export default function ResidentHostelAssistantPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [statusNotice, setStatusNotice] = useState<string | null>(null);
 
+  // Real-Time Server-Sent Events (SSE) Stream Listener for Resident Chat
+  React.useEffect(() => {
+    try {
+      const eventSource = new EventSource('http://localhost:8000/api/v1/live-updates/events?organization_id=org_azure_group&property_id=prop_azure_palm_resort');
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'LIVE_UPDATE_CHANGED') {
+            setStatusNotice(`⚡ Live Update: ${data.title || 'New hostel operational update available'}`);
+            setTimeout(() => setStatusNotice(null), 6000);
+          }
+        } catch (e) {
+          console.warn('SSE parse error:', e);
+        }
+      };
+      return () => eventSource.close();
+    } catch (e) {
+      console.warn('SSE stream fallback:', e);
+    }
+  }, []);
+
   const getLanguageTag = (lang: string) => {
     switch (lang) {
       case 'Malayalam': return 'ml-IN';

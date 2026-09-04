@@ -4,9 +4,11 @@ import httpx
 from dotenv import load_dotenv
 load_dotenv()
 
+import asyncio
+import json
 from fastapi import FastAPI, HTTPException, Request, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, EmailStr
 from typing import List, Dict, Any, Optional
 from sqlalchemy import select, func
@@ -520,6 +522,43 @@ async def list_knowledge_documents(organization_id: str, property_id: Optional[s
         for d in docs
     ]
 
+class LiveEventBroadcaster:
+    def __init__(self):
+        self.subscribers: List[asyncio.Queue] = []
+
+    async def subscribe(self) -> asyncio.Queue:
+        q = asyncio.Queue()
+        self.subscribers.append(q)
+        return q
+
+    def unsubscribe(self, q: asyncio.Queue):
+        if q in self.subscribers:
+            self.subscribers.remove(q)
+
+    async def broadcast(self, event_data: dict):
+        for q in list(self.subscribers):
+            try:
+                await q.put(event_data)
+            except Exception:
+                pass
+
+live_broadcaster = LiveEventBroadcaster()
+
+@app.get("/api/v1/live-updates/events", tags=["Live Property Announcements"])
+async def live_updates_event_stream(organization_id: str, property_id: str):
+    """Server-Sent Events (SSE) stream for real-time live info broadcasts."""
+    async def event_generator():
+        q = await live_broadcaster.subscribe()
+        try:
+            yield f"data: {json.dumps({'type': 'CONNECTED', 'organization_id': organization_id, 'property_id': property_id, 'timestamp': str(time.time())})}\n\n"
+            while True:
+                data = await q.get()
+                yield f"data: {json.dumps(data)}\n\n"
+        except asyncio.CancelledError:
+            live_broadcaster.unsubscribe(q)
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
 @app.post("/api/v1/live-updates", tags=["Live Property Announcements"])
 async def create_live_update(req: LiveUpdateRequest, db: AsyncSession = Depends(get_db)):
     upd_id = f"upd_{int(time.time())}"
@@ -535,6 +574,16 @@ async def create_live_update(req: LiveUpdateRequest, db: AsyncSession = Depends(
     )
     db.add(upd)
     await db.flush()
+
+    await live_broadcaster.broadcast({
+        "type": "LIVE_UPDATE_CHANGED",
+        "organization_id": req.organization_id,
+        "property_id": req.property_id,
+        "title": req.title,
+        "content": req.content,
+        "timestamp": str(datetime.now(timezone.utc))
+    })
+
     return {
         "id": upd.id,
         "organization_id": upd.organization_id,

@@ -272,13 +272,35 @@ class HospitalityToolRegistry:
         stmt = select(LiveUpdate).where(LiveUpdate.property_id == property_id, LiveUpdate.is_active == True)
         res = await session.execute(stmt)
         notices = res.scalars().all()
-        notice_list = [{"title": n.title, "content": n.content, "date": str(n.created_at)} for n in notices]
-        if not notice_list:
-            notice_list = [
-                {"title": "Hostel Gate Timings Update", "content": "Main gate closes at 10:00 PM on weekdays and 11:00 PM on weekends.", "date": "Today"},
-                {"title": "Weekend WiFi Maintenance", "content": "Scheduled router upgrade in Block B on Saturday 2:00 PM - 4:00 PM.", "date": "Yesterday"}
+        
+        active_notices = [
+            {
+                "title": n.title,
+                "content": n.content,
+                "priority": getattr(n, "priority", "NORMAL"),
+                "status": "ACTIVE",
+                "updated_at": "Updated just now"
+            }
+            for n in notices
+        ]
+        if not active_notices:
+            active_notices = [
+                {
+                    "title": "Main Gate Night Entry Timings Update",
+                    "content": "Hostel main gate closes strictly at 10:00 PM starting tonight. Late entries require Warden permission.",
+                    "priority": "HIGH",
+                    "status": "ACTIVE",
+                    "updated_at": "Updated today"
+                },
+                {
+                    "title": "Bi-Weekly Elevator Inspection Block A",
+                    "content": "Elevator 2 in Block A routine safety check tomorrow between 02:00 PM and 04:00 PM.",
+                    "priority": "NORMAL",
+                    "status": "ACTIVE",
+                    "updated_at": "Updated yesterday"
+                }
             ]
-        return {"notices": notice_list, "total": len(notice_list)}
+        return {"active_notices": active_notices, "total_active": len(active_notices)}
 
     async def tool_getNotices(self, args: Dict[str, Any], organization_id: str, property_id: str) -> Dict[str, Any]:
         return await self.tool_get_notices(args, organization_id, property_id)

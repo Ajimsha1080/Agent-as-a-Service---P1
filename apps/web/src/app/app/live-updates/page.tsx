@@ -122,6 +122,26 @@ export default function AppLiveUpdatesPage() {
     { id: 'aud_2', actor: 'Hostel Admin', summary: 'Admin disabled: Payment Information, Attendance, Staff Information', timestamp: 'Yesterday, 11:30 AM' }
   ]);
 
+  // Real-Time Server-Sent Events (SSE) Stream Listener
+  useEffect(() => {
+    try {
+      const eventSource = new EventSource('http://localhost:8000/api/v1/live-updates/events?organization_id=org_azure_group&property_id=prop_azure_palm_resort');
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'LIVE_UPDATE_CHANGED') {
+            showToast(`⚡ Real-Time Live Update: ${data.title || 'Live Information updated across clients'}`);
+          }
+        } catch (e) {
+          console.warn('SSE parse error:', e);
+        }
+      };
+      return () => eventSource.close();
+    } catch (e) {
+      console.warn('SSE stream listener fallback:', e);
+    }
+  }, []);
+
   const handleToggleCategory = (key: string) => {
     setDataAccessCategories(prev => prev.map(c => {
       if (c.category_key === key) {

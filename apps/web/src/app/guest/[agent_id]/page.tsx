@@ -290,11 +290,14 @@ export default function ResidentHostelAssistantPage() {
     }
   };
 
-  const triggerSampleVoiceTurn = (queryText: string) => {
+  const triggerSampleVoiceTurn = (queryText?: string) => {
+    const activeLang = languageRef.current || language;
+    const chipsForLang = ACTION_CHIPS[activeLang] || ACTION_CHIPS.English;
+    const sampleQuery = (queryText && activeLang === 'English') ? queryText : chipsForLang.dinner;
     setVoiceState('listening');
     setTimeout(() => setVoiceState('thinking'), 1500);
     setTimeout(async () => {
-      const reply = await sendVoiceMessage(queryText);
+      const reply = await sendVoiceMessage(sampleQuery);
       if (reply) speakResponse(reply);
       else setVoiceState('idle');
     }, 3000);
@@ -344,8 +347,12 @@ export default function ResidentHostelAssistantPage() {
               languageRef.current = newLang;
               setLanguage(newLang);
               setMessages(prev => {
-                if (prev.length === 1 && prev[0].sender === 'agent') {
-                  return [{ sender: 'agent', text: WELCOME_GREETINGS[newLang] || WELCOME_GREETINGS.English }];
+                const newGreeting = WELCOME_GREETINGS[newLang] || WELCOME_GREETINGS.English;
+                if (prev.length === 0) return [{ sender: 'agent', text: newGreeting }];
+                if (prev[0].sender === 'agent') {
+                  const copy = [...prev];
+                  copy[0] = { sender: 'agent', text: newGreeting };
+                  return copy;
                 }
                 return prev;
               });

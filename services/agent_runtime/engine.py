@@ -34,9 +34,11 @@ class AgentRuntimeEngine:
         property_id: str,
         agent_id: str,
         channel: str = "web_widget",
-        language: str = "English"
+        language: str = "English",
+        user_context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """Executes a single multi-tenant agent turn supporting Sarvam AI Indic LLM & LiteLLM routing."""
+        user_context = user_context or {"user_role": "resident", "resident_id": "res_default_1"}
         start_time = time.time()
         model_name = agent_config.get("model_name", "sarvam-2b")
         system_prompt = agent_config.get("system_prompt", "You are a professional AI Concierge.")
@@ -80,7 +82,7 @@ class AgentRuntimeEngine:
         agent_status = "AI_ACTIVE"
 
         if any(k in user_lower for k in ["available", "availability", "vacancy", "check in", "check-in", "dates", "room", "rate", "price", "suite", "villa", "cottage"]):
-            avail_res = await self.tool_registry.execute_tool("check_room_availability", {"query": user_message}, organization_id, property_id, enabled_tools)
+            avail_res = await self.tool_registry.execute_tool("check_room_availability", {"query": user_message}, organization_id, property_id, enabled_tools, user_context=user_context)
             tool_calls_executed.append(avail_res)
             debug_trace["tools_called"].append("check_room_availability")
             if avail_res["success"]:
@@ -91,7 +93,7 @@ class AgentRuntimeEngine:
                 response_text = "I am checking live room availability. Please share your check-in and check-out dates."
 
         elif any(k in user_lower for k in ["pool", "spa", "gym", "facility", "swimming"]):
-            facility_res = await self.tool_registry.execute_tool("get_facility_status", {"facility_name": user_message}, organization_id, property_id, enabled_tools)
+            facility_res = await self.tool_registry.execute_tool("get_facility_status", {"facility_name": user_message}, organization_id, property_id, enabled_tools, user_context=user_context)
             tool_calls_executed.append(facility_res)
             debug_trace["tools_called"].append("get_facility_status")
             if facility_res["success"]:
@@ -101,7 +103,7 @@ class AgentRuntimeEngine:
                 response_text = "I checked our facility records, but please allow me to verify directly with our front desk staff."
 
         elif any(k in user_lower for k in ["book", "reserve"]):
-            book_res = await self.tool_registry.execute_tool("create_booking", {"customer_name": "Valued Guest", "check_in": "2026-09-01", "check_out": "2026-09-04"}, organization_id, property_id, enabled_tools)
+            book_res = await self.tool_registry.execute_tool("create_booking", {"customer_name": "Valued Guest", "check_in": "2026-09-01", "check_out": "2026-09-04"}, organization_id, property_id, enabled_tools, user_context=user_context)
             tool_calls_executed.append(book_res)
             debug_trace["tools_called"].append("create_booking")
             if book_res["success"]:
@@ -111,7 +113,7 @@ class AgentRuntimeEngine:
                 response_text = "I can assist you with your booking. Please confirm your desired room type and stay dates."
 
         elif any(k in user_lower for k in ["activity", "activities", "schedule", "entertainment"]):
-            act_res = await self.tool_registry.execute_tool("get_today_activities", {}, organization_id, property_id, enabled_tools)
+            act_res = await self.tool_registry.execute_tool("get_today_activities", {}, organization_id, property_id, enabled_tools, user_context=user_context)
             tool_calls_executed.append(act_res)
             debug_trace["tools_called"].append("get_today_activities")
             if act_res["success"]:
@@ -122,7 +124,7 @@ class AgentRuntimeEngine:
                 response_text = "Here are today's featured activities: Sunrise Yoga (07:00 AM), Sunset Beach Kayaking (05:00 PM), Authentic Kerala Cooking Class (06:30 PM)."
 
         elif any(k in user_lower for k in ["restaurant", "menu", "dining", "food", "eat"]):
-            rest_res = await self.tool_registry.execute_tool("get_restaurant_status", {}, organization_id, property_id, enabled_tools)
+            rest_res = await self.tool_registry.execute_tool("get_restaurant_status", {}, organization_id, property_id, enabled_tools, user_context=user_context)
             tool_calls_executed.append(rest_res)
             debug_trace["tools_called"].append("get_restaurant_status")
             if rest_res["success"]:
@@ -133,7 +135,7 @@ class AgentRuntimeEngine:
                 response_text = "Our resort dining venues include L'Attico Fine Dining (Coastal & Continental) and The Cove Beachfront Bar."
 
         elif any(k in user_lower for k in ["event", "announcement", "property update", "today's update", "news"]):
-            updates_res = await self.tool_registry.execute_tool("get_current_property_updates", {}, organization_id, property_id, enabled_tools)
+            updates_res = await self.tool_registry.execute_tool("get_current_property_updates", {}, organization_id, property_id, enabled_tools, user_context=user_context)
             tool_calls_executed.append(updates_res)
             debug_trace["tools_called"].append("get_current_property_updates")
             if updates_res["success"]:
@@ -144,7 +146,7 @@ class AgentRuntimeEngine:
                 response_text = "Here is today's update: All resort facilities are operating normally."
 
         elif "human" in user_lower or "manager" in user_lower or "reception" in user_lower or "complaint" in user_lower or "staff" in user_lower:
-            handoff_res = await self.tool_registry.execute_tool("handoff_to_human", {"reason": user_message}, organization_id, property_id, enabled_tools)
+            handoff_res = await self.tool_registry.execute_tool("handoff_to_human", {"reason": user_message}, organization_id, property_id, enabled_tools, user_context=user_context)
             tool_calls_executed.append(handoff_res)
             debug_trace["tools_called"].append("handoff_to_human")
             agent_status = "HUMAN_REQUESTED"

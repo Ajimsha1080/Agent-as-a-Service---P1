@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
-  Building2, Bot, BookOpen, Radio, BarChart3, CreditCard, Home, MessageSquare, ChevronLeft, ChevronRight, Search, Bell, Sparkles 
+  Building2, Bot, BookOpen, Radio, BarChart3, CreditCard, Home, MessageSquare, ChevronLeft, ChevronRight, Search, Bell, Sparkles, Users 
 } from 'lucide-react';
 import { CommandMenu } from '../../components/ui/command-menu';
 

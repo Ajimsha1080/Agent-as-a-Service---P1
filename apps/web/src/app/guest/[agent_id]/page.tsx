@@ -6,18 +6,18 @@ import { VoiceOrb } from '../../../components/ui/voice-orb';
 
 const WELCOME_GREETINGS: Record<string, string> = {
   English: 'Welcome to Azure Hostel! I am your Hostel AI Assistant. Ask me anything about your hostel, mess menu, timings, rules, or room maintenance.',
-  Malayalam: 'അസൂർ ഹോസ്റ്റലിലേക്ക് സ്വാഗതം! ഞാൻ നിങ്ങളുടെ ഹോസ്റ്റൽ AI അസിസ്റ്റന്റ് ആണ്. മെസ് മെനു, സമയങ്ങൾ, നിയമങ്ങൾ അല്ലെങ്കിൽ മുറി അറ്റകുറ്റപ്പണികളെക്കുറിച്ച് എന്നോട് ചോദിക്കുക.',
-  Hindi: 'अज़ूर हॉस्टल में आपका स्वागत है! मैं आपका हॉस्टल AI सहायक हूँ। मैस मेन्यू, समय, नियम या कमरे के रख-रखाव के बारे में मुझसे कुछ भी पूछें।',
-  Tamil: 'அஸூர் ஹாஸ்டலுக்கு நல்வரவு! நான் உங்கள் ஹாஸ்டல் AI உதவியாளர். மெஸ் மெனு, நேரங்கள், விதிகள் அல்லது அறை பராமரிப்பு பற்றி எதையும் கேட்கவும்.',
-  Telugu: 'అజూర్ హాస్టల్‌కి స్వాగతం! నేను మీ హాస్టల్ AI సహాయకుడిని. మెస్ మెనూ, సమయాలు, నిబంధనలు లేదా గది నిర్వహణ గురించి నన్ను ఏదైనా అడగండి.',
-  Kannada: 'ಅಜೂರ್ ಹಾಸ್ಟೆಲ್‌ಗೆ ಸುಸ್ವಾಗತ! ನಾನು ನಿಮ್ಮ ಹಾಸ್ಟೆಲ್ AI ಸಹಾಯಕ. ಮೆಸ್ ಮೆನು, ಸಮಯ, ನಿಯಮಗಳು ಅಥವಾ ಕೊಠಡಿ ನಿರ್ವಹಣೆ ಬಗ್ಗೆ ಕೇಳಿ.'
+  Malayalam: 'അസൂർ ഹോസ്റ്റലിലേക്ക് സ്വാഗതം! ഞാൻ നിങ്ങളുടെ ഹോസ്റ്റൽ AI അസിസ്റ്റന്റ് ആണ്.',
+  Hindi: 'अज़ूर हॉस्टल में आपका स्वागत है! मैं आपका हॉस्टल AI सहायक हूँ।',
+  Tamil: 'அஸூர் ஹாஸ்டலுக்கு நல்வரவு! நான் உங்கள் ஹாஸ்டல் AI உதவியாளர்.',
+  Telugu: 'అజూర్ హాస్టల్‌కి స్వాగతం! నేను మీ హాస్టల్ AI సహాయకుడిని.',
+  Kannada: 'ಅಜೂರ್ ಹಾಸ್ಟೆಲ್‌ಗೆ ಸುಸ್ವಾಗತ! ನಾನು ನಿಮ್ಮ ಹಾಸ್ಟೆಲ್ AI ಸಹಾಯಕ.'
 };
 
 const FALLBACK_RESPONSES: Record<string, string> = {
   English: 'Thank you for asking! Hostel gate and dining operations are fully running today. Dinner is served at 08:00 PM.',
-  Malayalam: 'ചോദിച്ചതിന് നന്ദി! ഹോസ്റ്റൽ ഗേറ്റും മെസ് ഡൈനിംഗും ഇന്ന് തടസ്സമില്ലാതെ പ്രവർത്തിക്കുന്നു. അത്താഴം രാത്രി 08:00 ന് നൽകും.',
-  Hindi: 'पूछने के लिए धन्यवाद! हॉस्टल गेट और मैस डायनिंग आज सामान्य रूप से चालू हैं। रात का खाना रात 08:00 बजे परोसा जाएगा।',
-  Tamil: 'கேட்டதற்கு நன்றி! ஹாஸ்டல் கேட் மற்றும் மெஸ் இயங்குகின்றன. இரவு உணவு 08:00 மணிக்கு வழங்கப்படும்.',
+  Malayalam: 'ചോദിച്ചതിന് നന്ദി! ഹോസ്റ്റൽ ഗേറ്റും മെസ് ഡൈനിംഗും ഇന്ന് തടസ്സമില്ലാതെ പ്രവർത്തിക്കുന്നു.',
+  Hindi: 'पूछने के लिए धन्यवाद! हॉस्टल गेट और मैस डायनिंग आज सामान्य रूप से चालू हैं।',
+  Tamil: 'கேட்டதற்கு நன்றி! ஹாஸ்டல் கேட் மற்றும் മെസ് இயங்குகின்றன.',
   Telugu: 'అడిగినందుకు ధన్యవాదాలు! హాస్టల్ గేట్ మరియు డైనింగ్ ఈరోజు అందుబాటులో ఉన్నాయి.',
   Kannada: 'ಕೇಳಿದ್ದಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು! ಹಾಸ್ಟೆಲ್ ಗೇಟ್ ಮತ್ತು ಡೈನಿಂಗ್ ಇಂದು ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಿದೆ.'
 };
@@ -81,34 +81,14 @@ const ACTION_CHIPS: Record<string, { dinner: string; timing: string; rules: stri
 
 const PLACEHOLDERS: Record<string, string> = {
   English: 'Ask me anything about your hostel (mess menu, timings, rules, maintenance)...',
-  Malayalam: 'ഹോസ്റ്റലിനെക്കുറിച്ച് എന്തും ചോദിക്കുക (മെനു, സമയങ്ങൾ, നിയമങ്ങൾ)...',
-  Hindi: 'अपने हॉस्टल के बारे में कुछ भी पूछें (मेन्यू, समय, नियम, मेंटेनेंस)...',
-  Tamil: 'உங்கள் ஹாஸ்டல் பற்றி எதையும் கேட்கவும் (மெனு, நேரங்கள், விதிகள்)...',
-  Telugu: 'మీ హాస్టల్ గురించి ఏదైనా అడగండి (మెనూ, సమయాలు, నిబంధనలు)...',
-  Kannada: 'ನಿಮ್ಮ ಹಾಸ್ಟೆಲ್ ಬಗ್ಗೆ ಕೇಳಿ (ಮೆನು, ಸಮಯ, ನಿಯಮಗಳು)...'
-};లో ఉన్నాయి.',
-  Kannada: 'ನಮ್ಮನ್ನು ಸಂಪರ್ಕಿಸಿದ್ದಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು! ರೆಸಾರ್ಟ್‌ನ ಎಲ್ಲಾ ಸೌಲಭ್ಯಗಳು ಇಂದು ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಿವೆ.'
+  Malayalam: 'ഹോസ്റ്റലിനെക്കുറിച്ച് എന്തും ചോദിക്കുക...',
+  Hindi: 'अपने हॉस्टल के बारे में कुछ भी पूछें...',
+  Tamil: 'உங்கள் ஹாஸ்டல் பற்றி எதையும் கேட்கவும்...',
+  Telugu: 'మీ హాస్టల్ గురించి ఏదైనా అడగండి...',
+  Kannada: 'ನಿಮ್ಮ ಹಾಸ್ಟೆಲ್ ಬಗ್ಗೆ ಕೇಳಿ...'
 };
 
-const ACTION_CHIPS: Record<string, { pool: string; rooms: string; activities: string; dining: string }> = {
-  English: { pool: '🏊 Pool Status', rooms: '🛌 Room Prices', activities: "🌴 Today's Activities", dining: '🍽️ Dining Menu' },
-  Malayalam: { pool: '🏊 പൂൾ വിവരങ്ങൾ', rooms: '🛌 മുറി നിരക്കുകൾ', activities: '🌴 ഇന്നത്തെ പരിപാടികൾ', dining: '🍽️ ഡൈനിംഗ് മെനു' },
-  Hindi: { pool: '🏊 स्विमिंग पूल स्थिति', rooms: '🛌 कमरे के दाम', activities: '🌴 आज की गतिविधियां', dining: '🍽️ रेस्टोरेंट मेन्यू' },
-  Tamil: { pool: '🏊 நீச்சல் குளம்', rooms: '🛌 அறை கட்டணம்', activities: '🌴 இன்றைய நிகழ்ச்சிகள்', dining: '🍽️ உணவக மெனு' },
-  Telugu: { pool: '🏊 స్విమ్మింగ్ పూల్', rooms: '🛌 గది ధరలు', activities: '🌴 నేటి కార్యక్రమాలు', dining: '🍽️ రెస్టారెంట్ మెనూ' },
-  Kannada: { pool: '🏊 ಈಜು ಕೊಳದ ಮಾಹಿತಿ', rooms: '🛌 ಕೊಠಡಿ ದರಗಳು', activities: '🌴 ಇಂದಿನ ಚಟುವಟಿಕೆಗಳು', dining: '🍽️ ಉಪಹಾರ ಗೃಹ' }
-};
-
-const PLACEHOLDERS: Record<string, string> = {
-  English: 'Ask about rooms, pool hours, dining menus, or activities...',
-  Malayalam: 'മുറികൾ, പൂൾ സമയങ്ങൾ, ഡൈനിംഗ് മെനു അല്ലെങ്കിൽ പരിപാടികളെക്കുറിച്ച് ചോദിക്കുക...',
-  Hindi: 'कमरों, पूल के समय, रेस्टोरेंट या गतिविधियों के बारे में पूछें...',
-  Tamil: 'அறைகள், குளம் நேரம், உணவகம் அல்லது செயல்பாடுகள் பற்றி கேட்கவும்...',
-  Telugu: 'గదులు, పూల్ సమయాలు, డైనింగ్ లేదా కార్యక్రమాల గురించి అడగండి...',
-  Kannada: 'ಕೊಠಡಿಗಳು, ಈಜು ಕೊಳ ಸಮಯ, ಉಪಹಾರ ಅಥವಾ ಚಟುವಟಿಕೆಗಳ ಬಗ್ಗೆ ಕೇಳಿ...'
-};
-
-export default function GuestConciergePage() {
+export default function ResidentHostelAssistantPage() {
   const [mode, setMode] = useState<'chat' | 'voice'>('chat');
   const [voiceState, setVoiceState] = useState<'idle' | 'listening' | 'thinking' | 'speaking'>('idle');
   const [language, setLanguage] = useState('English');
@@ -117,26 +97,11 @@ export default function GuestConciergePage() {
   const [messages, setMessages] = useState([
     { sender: 'agent', text: WELCOME_GREETINGS.English }
   ]);
-  const [propertyTitle, setPropertyTitle] = useState('Azure Palm Resort & Spa');
-  const [propertySubtitle, setPropertySubtitle] = useState('Digital Concierge • Coastal Kerala');
+  const [propertyTitle, setPropertyTitle] = useState('Azure Palm Hostel & Campus Residence');
+  const [propertySubtitle, setPropertySubtitle] = useState('Hostel Assistant • Campus Block A');
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [statusNotice, setStatusNotice] = useState<string | null>(null);
-
-  React.useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/v1/properties/prop_azure_palm_resort')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.name) {
-          setPropertyTitle(data.name);
-          if (data.address) {
-            const loc = data.address.split(',').slice(-2).join(',').strip?.() || data.address;
-            setPropertySubtitle(`Digital Concierge • ${loc}`);
-          }
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   const getLanguageTag = (lang: string) => {
     switch (lang) {
@@ -150,7 +115,7 @@ export default function GuestConciergePage() {
   };
 
   const getApiEndpoint = () => {
-    return typeof window !== 'undefined' ? 'http://127.0.0.1:8000/api/v1/agents/agt_concierge_01/chat' : 'http://127.0.0.1:8000/api/v1/agents/agt_concierge_01/chat';
+    return 'http://127.0.0.1:8000/api/v1/agents/agt_hostel_01/chat';
   };
 
   const sendVoiceMessage = async (queryText: string): Promise<string | null> => {
@@ -192,20 +157,20 @@ export default function GuestConciergePage() {
         const audio = new Audio(`data:audio/wav;base64,${data.audio_base64}`);
         audio.onended = () => setVoiceState('idle');
         audio.onerror = () => fallbackBrowserSpeech(text, activeLang);
-        await audio.play();
-        return;
+        audio.play();
+      } else {
+        fallbackBrowserSpeech(text, activeLang);
       }
     } catch (e) {
-      console.error("Sarvam TTS streaming error:", e);
+      fallbackBrowserSpeech(text, activeLang);
     }
-    fallbackBrowserSpeech(text, activeLang);
   };
 
-  const fallbackBrowserSpeech = (text: string, activeLang: string) => {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+  const fallbackBrowserSpeech = (text: string, lang: string) => {
+    if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = getLanguageTag(activeLang);
+      utterance.lang = getLanguageTag(lang);
       utterance.onend = () => setVoiceState('idle');
       utterance.onerror = () => setVoiceState('idle');
       window.speechSynthesis.speak(utterance);
@@ -214,59 +179,14 @@ export default function GuestConciergePage() {
     }
   };
 
-  const handleSendMessage = async (queryText?: string) => {
-    const textToSend = queryText || inputText;
-    if (!textToSend.trim()) return;
-
+  const startVoiceInput = () => {
     const activeLang = languageRef.current || language;
-    const newMessages = [...messages, { sender: 'user', text: textToSend }];
-    setMessages(newMessages);
-    if (!queryText) setInputText('');
-    setIsLoading(true);
-
-    const lower = textToSend.toLowerCase();
-    if (lower.includes('pool') || lower.includes('spa') || lower.includes('gym') || lower.includes('പൂൾ') || lower.includes('पूल')) {
-      setStatusNotice(activeLang === 'Malayalam' ? 'പൂൾ വിവരങ്ങൾ പരിശോധിക്കുന്നു...' : activeLang === 'Hindi' ? 'पूल की जानकारी जांची जा रही है...' : 'Checking facility operational hours...');
-    } else if (lower.includes('room') || lower.includes('available') || lower.includes('price') || lower.includes('മുറി') || lower.includes('कमरा')) {
-      setStatusNotice(activeLang === 'Malayalam' ? 'തത്സമയ മുറി നിരക്കുകൾ പരിശോധിക്കുന്നു...' : activeLang === 'Hindi' ? 'कमरों की लाइव उपलब्धता जांची जा रही है...' : 'Checking live room availability & rates...');
-    } else {
-      setStatusNotice(activeLang === 'Malayalam' ? 'വിവരങ്ങൾ ശേഖരിക്കുന്നു...' : activeLang === 'Hindi' ? 'जानकारी ली जा रही है...' : 'Checking resort information...');
-    }
-
-    try {
-      const res = await fetch(getApiEndpoint(), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          organization_id: 'org_azure_group',
-          property_id: 'prop_azure_palm_resort',
-          message: activeLang !== 'English' ? `[Language: ${activeLang}] ${textToSend}` : textToSend,
-          channel: 'web_widget',
-          language: activeLang
-        })
-      });
-      const data = await res.json();
-      setStatusNotice(null);
-      setMessages([...newMessages, { sender: 'agent', text: data.response }]);
-    } catch (e) {
-      setStatusNotice(null);
-      const fallbackMsg = FALLBACK_RESPONSES[activeLang] || FALLBACK_RESPONSES.English;
-      setMessages([...newMessages, { sender: 'agent', text: fallbackMsg }]);
-    }
-    setIsLoading(false);
-  };
-
-  const handleVoiceClick = () => {
-    const activeLang = languageRef.current || language;
-    if (voiceState !== 'idle') {
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
-      setVoiceState('idle');
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      triggerSampleVoiceTurn("What's for dinner today?");
       return;
     }
 
-    if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+    try {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
       recognition.lang = getLanguageTag(activeLang);
@@ -287,12 +207,56 @@ export default function GuestConciergePage() {
       };
 
       recognition.onerror = () => {
-        fallbackVoiceSimulation();
+        setVoiceState('idle');
+        triggerSampleVoiceTurn("What's for dinner today?");
+      };
+
+      recognition.onend = () => {
+        if (voiceState === 'listening') {
+          setVoiceState('idle');
+        }
       };
 
       recognition.start();
-    } else {
-      fallbackVoiceSimulation();
+    } catch (e) {
+      triggerSampleVoiceTurn("What's for dinner today?");
+    }
+  };
+
+  const handleSendMessage = async (customMsg?: string) => {
+    const activeLang = languageRef.current || language;
+    const msgToSend = customMsg || inputText;
+    if (!msgToSend.trim() || isLoading) return;
+
+    setInputText('');
+    setMessages(prev => [...prev, { sender: 'user', text: msgToSend }]);
+    setIsLoading(true);
+
+    try {
+      const res = await fetch(getApiEndpoint(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          organization_id: 'org_azure_group',
+          property_id: 'prop_azure_palm_resort',
+          message: activeLang !== 'English' ? `[Language: ${activeLang}] ${msgToSend}` : msgToSend,
+          channel: 'web_widget',
+          language: activeLang
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setMessages(prev => [...prev, { sender: 'agent', text: data.response }]);
+      } else {
+        const fb = FALLBACK_RESPONSES[activeLang] || FALLBACK_RESPONSES.English;
+        setMessages(prev => [...prev, { sender: 'agent', text: fb }]);
+      }
+    } catch (err) {
+      const fb = FALLBACK_RESPONSES[activeLang] || FALLBACK_RESPONSES.English;
+      setMessages(prev => [...prev, { sender: 'agent', text: fb }]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -304,10 +268,6 @@ export default function GuestConciergePage() {
       if (reply) speakResponse(reply);
       else setVoiceState('idle');
     }, 3000);
-  };
-
-  const fallbackVoiceSimulation = () => {
-    triggerSampleVoiceTurn("What are today's room rates and availability?");
   };
 
   const currentChips = ACTION_CHIPS[language] || ACTION_CHIPS.English;
@@ -331,17 +291,17 @@ export default function GuestConciergePage() {
         </div>
       </div>
 
-      {/* Luxury Hotel Header */}
+      {/* Hostel Assistant Header */}
       <header className="p-5 border-b border-zinc-200 bg-white flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-zinc-900 text-white font-bold flex items-center justify-center text-xl shadow-xs">
-            🌴
+            🏢
           </div>
           <div>
             <h1 className="text-base font-bold text-zinc-900 flex items-center gap-2">
-              {propertyTitle} <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              Hostel Assistant <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
             </h1>
-            <p className="text-xs text-zinc-500 font-medium">{propertySubtitle}</p>
+            <p className="text-xs text-zinc-500 font-medium">Ask me anything about your hostel</p>
           </div>
         </div>
 
@@ -353,17 +313,6 @@ export default function GuestConciergePage() {
               const newLang = e.target.value;
               languageRef.current = newLang;
               setLanguage(newLang);
-              setMessages(prev => {
-                if (prev.length === 1 && prev[0].sender === 'agent') {
-                  return [{ sender: 'agent', text: WELCOME_GREETINGS[newLang] || WELCOME_GREETINGS.English }];
-                }
-                return prev;
-              });
-              if (newLang !== 'English') {
-                setStatusNotice(`Sarvam AI ${newLang} Engine connected.`);
-              } else {
-                setStatusNotice(null);
-              }
             }}
             className="bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 text-xs text-zinc-800 focus:outline-none font-semibold"
           >
@@ -372,57 +321,39 @@ export default function GuestConciergePage() {
             ))}
           </select>
 
-          <div className="flex bg-zinc-100 border border-zinc-200 p-0.5 rounded-lg">
+          <div className="flex bg-zinc-100 p-1 rounded-xl border border-zinc-200 text-xs font-semibold">
             <button 
               onClick={() => setMode('chat')}
-              className={`px-3 py-1 rounded-md text-xs font-semibold transition-colors ${mode === 'chat' ? 'bg-white text-zinc-900 shadow-xs' : 'text-zinc-500'}`}
+              className={`px-3 py-1 rounded-lg transition-colors ${mode === 'chat' ? 'bg-zinc-900 text-white shadow-xs' : 'text-zinc-600 hover:text-zinc-900'}`}
             >
-              Chat
+              💬 Text Chat
             </button>
             <button 
               onClick={() => setMode('voice')}
-              className={`px-3 py-1 rounded-md text-xs font-semibold transition-colors ${mode === 'voice' ? 'bg-white text-zinc-900 shadow-xs' : 'text-zinc-500'}`}
+              className={`px-3 py-1 rounded-lg transition-colors ${mode === 'voice' ? 'bg-zinc-900 text-white shadow-xs' : 'text-zinc-600 hover:text-zinc-900'}`}
             >
-              Voice
+              🎙️ Indic Voice
             </button>
           </div>
         </div>
       </header>
 
-      {/* Main Body */}
-      <main className="flex-1 flex flex-col justify-between p-6 bg-zinc-50/50">
+      {/* Main Container */}
+      <main className="flex-1 p-6 flex flex-col justify-between overflow-y-auto space-y-6">
         {mode === 'voice' ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-6">
-            <VoiceOrb state={voiceState} onToggleRecord={handleVoiceClick} />
-            <p className="text-xs text-zinc-500 font-mono text-center max-w-sm">
-              {voiceState === 'idle' && `Click microphone or sample button below to speak in ${language}`}
-              {voiceState === 'listening' && `Listening to microphone in ${language}...`}
-              {voiceState === 'thinking' && `Sarvam AI processing real-time turn...`}
-              {voiceState === 'speaking' && `Sarvam AI speaking in ${language}...`}
-            </p>
-
-            {voiceState === 'idle' && (
-              <div className="flex gap-2 flex-wrap justify-center">
-                <button 
-                  onClick={() => triggerSampleVoiceTurn("What are today's room rates and availability?")}
-                  className="px-3 py-1.5 bg-white border border-zinc-200 rounded-lg text-xs font-semibold text-zinc-700 hover:bg-zinc-100 shadow-xs"
-                >
-                  🎙️ {currentChips.rooms}
-                </button>
-                <button 
-                  onClick={() => triggerSampleVoiceTurn("Is the swimming pool open now?")}
-                  className="px-3 py-1.5 bg-white border border-zinc-200 rounded-lg text-xs font-semibold text-zinc-700 hover:bg-zinc-100 shadow-xs"
-                >
-                  {currentChips.pool}
-                </button>
-                <button 
-                  onClick={() => triggerSampleVoiceTurn("Show today's guest activities schedule")}
-                  className="px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-semibold hover:bg-zinc-100 shadow-xs"
-                >
-                  {currentChips.activities}
-                </button>
-              </div>
-            )}
+          <div className="flex-1 flex flex-col items-center justify-center space-y-8 py-12">
+            <VoiceOrb state={voiceState} onToggleRecord={startVoiceInput} />
+            <div className="text-center space-y-2">
+              <h2 className="text-base font-bold text-zinc-900">
+                {voiceState === 'idle' && 'Tap Orb & Speak to Hostel Assistant'}
+                {voiceState === 'listening' && 'Listening...'}
+                {voiceState === 'thinking' && 'Hostel AI Processing...'}
+                {voiceState === 'speaking' && 'Speaking Response...'}
+              </h2>
+              <p className="text-xs text-zinc-500 max-w-sm font-medium">
+                Supports Sarvam AI Malayalam, Hindi, Tamil, Telugu, Kannada & English voice reception.
+              </p>
+            </div>
           </div>
         ) : (
           <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
@@ -437,14 +368,6 @@ export default function GuestConciergePage() {
                 </div>
               </div>
             ))}
-
-            {statusNotice && (
-              <div className="flex justify-start">
-                <div className="text-xs text-zinc-600 italic bg-white border border-zinc-200 px-3.5 py-1.5 rounded-full flex items-center gap-2 shadow-xs">
-                  <Sparkles className="w-3.5 h-3.5 animate-spin text-zinc-500" /> {statusNotice}
-                </div>
-              </div>
-            )}
           </div>
         )}
 

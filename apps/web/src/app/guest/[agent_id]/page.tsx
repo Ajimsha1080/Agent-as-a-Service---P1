@@ -223,7 +223,8 @@ export default function ResidentHostelAssistantPage() {
       });
       const data = await res.json();
       if (data && data.audio_base64) {
-        const audio = new Audio(`data:audio/wav;base64,${data.audio_base64}`);
+        const mimeType = data.format || 'audio/mp3';
+        const audio = new Audio(`data:${mimeType};base64,${data.audio_base64}`);
         audio.onended = () => setVoiceState('idle');
         audio.onerror = () => fallbackBrowserSpeech(text, activeLang);
         try {

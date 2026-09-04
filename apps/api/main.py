@@ -1,5 +1,10 @@
 import time
 import os
+import io
+import wave
+import math
+import struct
+import base64
 import httpx
 from dotenv import load_dotenv
 load_dotenv()
@@ -451,7 +456,7 @@ def generate_synthetic_wav_audio(duration_sec: float = 1.8, sample_rate: int = 1
 async def text_to_speech_gateway(req: TTSRequest):
     cache_key = f"{req.language}:{req.text.strip().lower()}"
     if cache_key in TTS_AUDIO_CACHE:
-        return {"audio_base64": TTS_AUDIO_CACHE[cache_key], "format": "audio/wav", "source": "SARVAM_AI_TTS_CACHED_(₹0.00_COST)"}
+        return {"audio_base64": TTS_AUDIO_CACHE[cache_key], "format": "audio/mp3", "source": "INDIC_VOICE_TTS_CACHED"}
 
     sarvam_key = os.getenv("SARVAM_API_KEY") or settings.SARVAM_API_KEY or ""
     lang_map = {
@@ -483,8 +488,30 @@ async def text_to_speech_gateway(req: TTSRequest):
                         TTS_AUDIO_CACHE[cache_key] = audios[0]
                         return {"audio_base64": audios[0], "format": "audio/wav", "source": "REAL_SARVAM_AI_TTS"}
         except Exception as e:
-            print("TTS GATEWAY EXCEPTION:", str(e))
+            print("SARVAM TTS EXCEPTION:", str(e))
             pass
+
+    # Real Indic Spoken Speech Synthesis via gTTS
+    gtts_lang_map = {
+        "Malayalam": "ml",
+        "Hindi": "hi",
+        "Tamil": "ta",
+        "Telugu": "te",
+        "Kannada": "kn",
+        "English": "en"
+    }
+    g_lang = gtts_lang_map.get(req.language or "Malayalam", "ml")
+    try:
+        from gtts import gTTS
+        clean_text = req.text[:350]
+        tts = gTTS(text=clean_text, lang=g_lang)
+        buf = io.BytesIO()
+        tts.write_to_fp(buf)
+        b64_audio = base64.b64encode(buf.getvalue()).decode('utf-8')
+        TTS_AUDIO_CACHE[cache_key] = b64_audio
+        return {"audio_base64": b64_audio, "format": "audio/mp3", "source": "REAL_GTTS_INDIC_VOICE"}
+    except Exception as e:
+        print("GTTS EXCEPTION:", str(e))
 
     synthetic_wav = generate_synthetic_wav_audio()
     TTS_AUDIO_CACHE[cache_key] = synthetic_wav

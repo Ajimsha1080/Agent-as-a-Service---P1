@@ -226,7 +226,15 @@ export default function ResidentHostelAssistantPage() {
         const audio = new Audio(`data:audio/wav;base64,${data.audio_base64}`);
         audio.onended = () => setVoiceState('idle');
         audio.onerror = () => fallbackBrowserSpeech(text, activeLang);
-        audio.play();
+        try {
+          const playPromise = audio.play();
+          if (playPromise !== undefined) {
+            await playPromise;
+          }
+        } catch (playErr) {
+          console.warn('Audio play promise blocked:', playErr);
+          fallbackBrowserSpeech(text, activeLang);
+        }
       } else {
         fallbackBrowserSpeech(text, activeLang);
       }
@@ -236,22 +244,49 @@ export default function ResidentHostelAssistantPage() {
   };
 
   const fallbackBrowserSpeech = (text: string, lang: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = getLanguageTag(lang);
-      utterance.onend = () => setVoiceState('idle');
-      utterance.onerror = () => setVoiceState('idle');
-      window.speechSynthesis.speak(utterance);
-    } else {
-      setVoiceState('idle');
+    setVoiceState('speaking');
+    let timer = setTimeout(() => setVoiceState('idle'), 4500);
+
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        const tag = getLanguageTag(lang);
+        utterance.lang = tag;
+        
+        const voices = window.speechSynthesis.getVoices();
+        const matchingVoice = voices.find(v => v.lang.toLowerCase().startsWith(tag.split('-')[0].toLowerCase()));
+        if (matchingVoice) utterance.voice = matchingVoice;
+
+        utterance.onend = () => {
+          clearTimeout(timer);
+          setVoiceState('idle');
+        };
+        utterance.onerror = () => {
+          clearTimeout(timer);
+          setVoiceState('idle');
+        };
+        window.speechSynthesis.speak(utterance);
+      } catch (err) {
+        console.warn('SpeechSynthesis error:', err);
+      }
     }
   };
 
   const startVoiceInput = () => {
     const activeLang = languageRef.current || language;
+
+    // Gesture unlock audio playback context
+    try {
+      const unlockAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+      unlockAudio.play().catch(() => {});
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.resume();
+      }
+    } catch (e) {}
+
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      triggerSampleVoiceTurn("What's for dinner today?");
+      triggerSampleVoiceTurn();
       return;
     }
 
@@ -277,7 +312,7 @@ export default function ResidentHostelAssistantPage() {
 
       recognition.onerror = () => {
         setVoiceState('idle');
-        triggerSampleVoiceTurn("What's for dinner today?");
+        triggerSampleVoiceTurn();
       };
 
       recognition.onend = () => {
@@ -288,7 +323,7 @@ export default function ResidentHostelAssistantPage() {
 
       recognition.start();
     } catch (e) {
-      triggerSampleVoiceTurn("What's for dinner today?");
+      triggerSampleVoiceTurn();
     }
   };
 

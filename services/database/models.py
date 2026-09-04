@@ -236,6 +236,22 @@ class LiveUpdate(Base):
 
     property = relationship("Property", back_populates="live_updates")
 
+class IntegrationSource(Base):
+    __tablename__ = "integration_sources"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=generate_uuid)
+    organization_id: Mapped[str] = mapped_column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    property_id: Mapped[str] = mapped_column(String(36), ForeignKey("properties.id", ondelete="CASCADE"), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    source_type: Mapped[str] = mapped_column(String(50), default="REST_API")
+    source_url: Mapped[str] = mapped_column(String(512), nullable=False)
+    auth_type: Mapped[str] = mapped_column(String(50), default="API_KEY")
+    credentials_masked: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    status: Mapped[str] = mapped_column(String(50), default="CONNECTED")
+    field_mappings: Mapped[dict] = mapped_column(JSON, default=dict)
+    last_synced_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=get_utc_now)
+
 class Reservation(Base):
     __tablename__ = "reservations"
 

@@ -31,6 +31,45 @@ const THINKING_TEXTS: Record<string, string> = {
   Kannada: 'ಹಾಸ್ಟೆಲ್ AI ಯೋಚಿಸುತ್ತಿದೆ...'
 };
 
+const VOICE_STATUS_TEXTS: Record<string, { idle: string; listening: string; thinking: string; speaking: string }> = {
+  English: {
+    idle: 'Tap Orb & Speak to Hostel Assistant',
+    listening: 'Listening to your voice...',
+    thinking: 'Hostel AI processing...',
+    speaking: 'Speaking response...'
+  },
+  Malayalam: {
+    idle: 'ഓർബ് ടാപ്പ് ചെയ്ത് ഹോസ്റ്റൽ AI-യോട് സംസാരിക്കുക',
+    listening: 'ശ്രദ്ധിക്കുന്നു...',
+    thinking: 'ഹോസ്റ്റൽ AI ചിന്തിക്കുന്നു...',
+    speaking: 'മറുപടി നൽകുന്നു...'
+  },
+  Hindi: {
+    idle: 'ऑर्ब टैप करें और हॉस्टल AI से बात करें',
+    listening: 'सुन रहा है...',
+    thinking: 'हॉस्टल AI सोच रहा है...',
+    speaking: 'उत्तर दे रहा है...'
+  },
+  Tamil: {
+    idle: 'ஆர்பைத் தட்டி ஹாஸ்டல் AI-யிடம் பேசவும்',
+    listening: 'கேட்கிறது...',
+    thinking: 'ஹாஸ்டல் AI யோசிக்கிறது...',
+    speaking: 'பதிலளிக்கிறது...'
+  },
+  Telugu: {
+    idle: 'ఆర్బ్‌ని నొక్కి హాస్టల్ AIతో మాట్లాడండి',
+    listening: 'వింటోంది...',
+    thinking: 'హాస్టల్ AI ఆలోచిస్తోంది...',
+    speaking: 'సమాధానం ఇస్తోంది...'
+  },
+  Kannada: {
+    idle: 'ಆರ್ಬ್ ತಟ್ಟಿ ಹಾಸ್ಟೆಲ್ AI ಜೊತೆ ಮಾತನಾಡಿ',
+    listening: 'ಕೇಳಿಸಿಕೊಳ್ಳುತ್ತಿದೆ...',
+    thinking: 'ಹಾಸ್ಟೆಲ್ AI ಯೋಚಿಸುತ್ತಿದೆ...',
+    speaking: 'ಉತ್ತರಿಸುತ್ತಿದೆ...'
+  }
+};
+
 const ACTION_CHIPS: Record<string, { dinner: string; timing: string; rules: string; laundry: string; fan: string; status: string; notices: string }> = {
   English: {
     dinner: "🍽️ What's for dinner today?",
@@ -384,18 +423,33 @@ export default function ResidentHostelAssistantPage() {
       {/* Main Container */}
       <main className="flex-1 p-6 flex flex-col justify-between overflow-y-auto space-y-6">
         {mode === 'voice' ? (
-          <div className="flex-1 flex flex-col items-center justify-center space-y-8 py-12">
+          <div className="flex-1 flex flex-col items-center justify-center space-y-6 py-6">
             <VoiceOrb state={voiceState} onToggleRecord={startVoiceInput} />
             <div className="text-center space-y-2">
               <h2 className="text-base font-bold text-zinc-900">
-                {voiceState === 'idle' && 'Tap Orb & Speak to Hostel Assistant'}
-                {voiceState === 'listening' && 'Listening...'}
-                {voiceState === 'thinking' && 'Hostel AI Processing...'}
-                {voiceState === 'speaking' && 'Speaking Response...'}
+                {(VOICE_STATUS_TEXTS[language] || VOICE_STATUS_TEXTS.English)[voiceState]}
               </h2>
               <p className="text-xs text-zinc-500 max-w-sm font-medium">
                 Supports Sarvam AI Malayalam, Hindi, Tamil, Telugu, Kannada & English voice reception.
               </p>
+            </div>
+
+            {/* Real-time Voice Message Transcript Stream */}
+            <div className="w-full max-w-xl space-y-3 mt-4 max-h-[220px] overflow-y-auto border-t border-zinc-200 pt-4 px-2">
+              <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider text-center">
+                🎙️ Voice Conversation Log
+              </div>
+              {messages.map((m, idx) => (
+                <div key={idx} className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs shadow-2xs ${
+                    m.sender === 'user' 
+                      ? 'bg-zinc-900 text-white rounded-br-none' 
+                      : 'bg-white border border-zinc-200 text-zinc-800 rounded-bl-none font-medium'
+                  }`}>
+                    {m.text}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         ) : (
